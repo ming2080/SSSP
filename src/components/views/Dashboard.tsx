@@ -45,12 +45,15 @@ import {
   Zap,
   Info,
   Shield,
+  Clock,
+  Sparkles,
+  Camera,
   X
 } from 'lucide-react';
 import { ViewType } from '@/src/types';
 
-// 设备细分类型定义 (对应附图分类)
-export type DeviceCategoryType = 'all' | 'work_station' | 'main_station' | 'gas_detector' | 'alarm_light';
+// 设备细分类型定义 (对应设备管理列表4分类: 主基站、气体探测器、声光报警器、摄像头)
+export type DeviceCategoryType = 'all' | 'main_station' | 'gas_detector' | 'alarm' | 'camera';
 
 // 空间电子围栏区域接口 (对应附图的多边形分区与状态浮标，并与电子围栏模块保持配置一致)
 export interface SpatialElectronicFence {
@@ -89,7 +92,7 @@ export interface SpatialElectronicFence {
 export interface SpatialDevice {
   id: string;
   name: string;
-  category: 'work_station' | 'main_station' | 'gas_detector' | 'alarm_light';
+  category: 'main_station' | 'gas_detector' | 'alarm' | 'camera';
   categoryLabel: string;
   code: string;
   location: string;
@@ -102,6 +105,42 @@ export interface SpatialDevice {
   frequency: string;
   valueText?: string;
   power?: string;
+}
+
+// 空间定位人员实体接口 (包含人员基本定位信息与冒泡坐标)
+export interface SpatialWorkerDetail {
+  id: string;
+  name: string;
+  role: string;
+  status: 'online' | 'offline' | 'alarm' | string;
+  location: string;
+  top?: string;
+  left?: string;
+  baseStation?: string;
+  projectName?: string;
+  time?: string;
+  battery?: string;
+  signalPower?: string;
+  phone?: string;
+  company?: string;
+  wearables?: string[];
+  area?: string;
+}
+
+// 紧急安全告警实体接口 (用于触发告警时的明显提示窗)
+export interface ActiveAlarmData {
+  id: string;
+  time: string;
+  name: string;
+  workerId: string;
+  role: string;
+  reason: string;
+  location: string;
+  projectName: string;
+  dangerLevel: 'high' | 'medium' | 'low';
+  gasReading?: string;
+  deviceLinked?: string;
+  status: 'pending' | 'handling' | 'resolved';
 }
 
 // 导入船模背景图
@@ -499,6 +538,290 @@ const projectListConfig: ProjectDashboardConfig[] = [
       { label: '分段总组进度', value: '30.0%', change: '+2.0%', isUp: true, icon: Activity, iconBg: 'bg-emerald-500/30 text-[#00e676] border-emerald-500/40' },
       { label: '高空防坠合格率', value: '99.5%', change: '+0.5%', isUp: true, icon: Compass, iconBg: 'bg-indigo-500/30 text-[#8ab4f8] border-indigo-500/40' },
     ]
+  },
+  {
+    id: 'PRJ-2026-PCTC05',
+    name: '17.5万吨 PCTC双燃料汽车运输船',
+    shipType: '汽车运输船',
+    shipCode: 'HULL-PCTC-175',
+    phase: '舾装系统调试',
+    progress: 72,
+    dockingArea: '2号码头 (停放舾装)',
+    manager: '吴强',
+    version: 'V2.4 (滚装滚卸系统调试)',
+    bgImage: containerModelBg,
+    totalPersonnel: 115,
+    onDutyPersonnel: 108,
+    offDutyPersonnel: 7,
+    alarmPersonnel: 1,
+    distributionData: [
+      { name: '甲板滚装区', value: 38, max: 45 },
+      { name: 'LNG双燃料罐', value: 28, max: 45 },
+      { name: '主推进主机舱', value: 24, max: 45 },
+      { name: '驾驶甲板楼', value: 18, max: 45 },
+    ],
+    typeData: [
+      { name: '舾装电工', value: 40.0, color: '#00d2ff' },
+      { name: '液压调试', value: 30.0, color: '#00e676' },
+      { name: '防腐涂装', value: 18.0, color: '#ffb300' },
+      { name: '验船师', value: 12.0, color: '#f4511e' },
+    ],
+    trendData: [
+      { time: '00:00', 在岗人数: 12, 报警人数: 0 },
+      { time: '04:00', 在岗人数: 8, 报警人数: 0 },
+      { time: '08:00', 在岗人数: 98, 报警人数: 2 },
+      { time: '12:00', 在岗人数: 108, 报警人数: 3 },
+      { time: '16:00', 在岗人数: 102, 报警人数: 1 },
+      { time: '20:00', 在岗人数: 45, 报警人数: 0 },
+      { time: '24:00', 在岗人数: 15, 报警人数: 0 },
+    ],
+    deviceSummary: { total: 48, online: 46, offline: 2, fault: 0 },
+    deviceList: [
+      { id: 'PCTC-BS-M01', type: '2号码头舾装主基站', status: '在线', location: '2号码头中控塔', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'PCTC-BS-W01', type: '滚装跳板作业面基站', status: '在线', location: '艉部滚装跳板', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'PCTC-GAS-01', type: '双燃料气体检测仪', status: '在线', location: 'LNG双燃料罐区', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'PCTC-ALM-01', type: '液压坡道声光警报器', status: '在线', location: '甲板活动坡道', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+    ],
+    alerts: [
+      { time: '10:12', name: '周杰', reason: '液压坡道动作区未经许可进入', location: '3#滚装甲板' },
+    ],
+    featuredWorker: {
+      name: '吴强 (调试组长)',
+      id: 'PCTC20260308',
+      role: '滚装系统调试总师',
+      location: '艉部跳板液压泵站',
+      time: '2026-08-28 10:05:18',
+      status: '带压测试'
+    },
+    markers: [
+      { id: 'PCTC-W1', role: '调试总师', name: '吴强', type: 'online', top: '26%', left: '72%' },
+      { id: 'PCTC-W2', role: '液压工', name: '郑力', type: 'online', top: '38%', left: '48%' },
+      { id: 'PCTC-W3', role: '舾装电工', name: '马超', type: 'online', top: '44%', left: '28%' },
+      { id: 'PCTC-W4', role: '安全巡检员', name: '刘涛', type: 'alarm', top: '32%', left: '56%' },
+    ],
+    fences: [
+      { label: '艉部滚装跳板液压测试警戒区', location: '艉部滚装跳板', top: '28%', left: '60%', width: '200px', height: '100px' },
+      { label: 'LNG双燃料罐密闭管制区', location: 'C型LNG储罐区', top: '32%', left: '30%', width: '190px', height: '95px' }
+    ],
+    kpis: [
+      { label: '舾装调试人数', value: '115', change: '+1.8%', isUp: true, icon: Users, iconBg: 'bg-blue-600/30 text-[#00d2ff] border-blue-500/40' },
+      { label: '在岗施工人数', value: '108', change: '+2.5%', isUp: true, icon: User, iconBg: 'bg-blue-600/30 text-[#00d2ff] border-blue-500/40' },
+      { label: '滚装测试告警', value: '1', change: '-50.0%', isUp: false, icon: AlertTriangle, iconBg: 'bg-amber-500/30 text-[#ffb300] border-amber-500/40' },
+      { label: '在线定位设备', value: '46', change: '+4.2%', isUp: true, icon: Cpu, iconBg: 'bg-cyan-500/30 text-[#00d2ff] border-cyan-500/40' },
+      { label: '舾装调试进度', value: '72.0%', change: '+1.0%', isUp: true, icon: Activity, iconBg: 'bg-emerald-500/30 text-[#00e676] border-emerald-500/40' },
+      { label: '滚装跳板合格率', value: '100%', change: '0.0%', isUp: true, icon: Compass, iconBg: 'bg-indigo-500/30 text-[#8ab4f8] border-indigo-500/40' },
+    ]
+  },
+  {
+    id: 'PRJ-2026-WIND06',
+    name: '1500吨 自升式海上风电安装船',
+    shipType: '风电安装船',
+    shipCode: 'HULL-WIND-1500',
+    phase: '桩腿合拢搭设',
+    progress: 52,
+    dockingArea: '4号造船台 (停放搭载)',
+    manager: '徐立',
+    version: 'V1.8 (自升桩腿吊装合拢)',
+    bgImage: lngModelBg,
+    totalPersonnel: 88,
+    onDutyPersonnel: 82,
+    offDutyPersonnel: 6,
+    alarmPersonnel: 2,
+    distributionData: [
+      { name: '4#自升桩腿区', value: 32, max: 40 },
+      { name: '1200T绕桩起重机', value: 26, max: 40 },
+      { name: 'DP2动力定位舱', value: 14, max: 40 },
+      { name: '甲板风机堆存区', value: 10, max: 40 },
+    ],
+    typeData: [
+      { name: '重型起重', value: 42.0, color: '#00d2ff' },
+      { name: '高空合拢焊工', value: 32.0, color: '#00e676' },
+      { name: '液压插桩调试', value: 16.0, color: '#ffb300' },
+      { name: '质检安全', value: 10.0, color: '#f4511e' },
+    ],
+    trendData: [
+      { time: '00:00', 在岗人数: 10, 报警人数: 0 },
+      { time: '04:00', 在岗人数: 6, 报警人数: 0 },
+      { time: '08:00', 在岗人数: 78, 报警人数: 2 },
+      { time: '12:00', 在岗人数: 82, 报警人数: 4 },
+      { time: '16:00', 在岗人数: 76, 报警人数: 2 },
+      { time: '20:00', 在岗人数: 30, 报警人数: 1 },
+      { time: '24:00', 在岗人数: 12, 报警人数: 0 },
+    ],
+    deviceSummary: { total: 38, online: 36, offline: 2, fault: 0 },
+    deviceList: [
+      { id: 'WIND-BS-M01', type: '4号船台风电搭载主基站', status: '在线', location: '4号船台塔吊顶', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'WIND-BS-W01', type: '桩腿高空作业面基站', status: '在线', location: '3#桩腿50m平台', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'WIND-GAS-01', type: '密闭管廊气体分析仪', status: '在线', location: '桩腿升降机构管廊', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+      { id: 'WIND-ALM-01', type: '1200T绕桩吊防碰报警器', status: '在线', location: '绕桩起重机吊臂', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+    ],
+    alerts: [
+      { time: '10:35', name: '黄伟', reason: '桩腿50m高空未双钩挂扣', location: '3#桩腿高空平台' },
+    ],
+    featuredWorker: {
+      name: '徐立 (总工程师)',
+      id: 'WIND20260512',
+      role: '桩腿合拢工程师',
+      location: '1200T绕桩吊基座',
+      time: '2026-08-28 10:20:45',
+      status: '垂直测量'
+    },
+    markers: [
+      { id: 'WIND-W1', role: '总工程师', name: '徐立', type: 'online', top: '24%', left: '50%' },
+      { id: 'WIND-W2', role: '高空焊工', name: '高飞', type: 'alarm', top: '18%', left: '34%' },
+      { id: 'WIND-W3', role: '起重指挥', name: '陈兵', type: 'online', top: '36%', left: '65%' },
+      { id: 'WIND-W4', role: '升降机构调试', name: '孙跃', type: 'online', top: '46%', left: '40%' },
+    ],
+    fences: [
+      { label: '自升桩腿50m高空合拢警戒区', location: '3#、4#自升桩腿', top: '22%', left: '32%', width: '210px', height: '105px' },
+      { label: '1200T绕桩起重机旋转警戒区', location: '主绕桩起重机', top: '28%', left: '55%', width: '190px', height: '100px' }
+    ],
+    kpis: [
+      { label: '桩腿搭设人数', value: '88', change: '+3.2%', isUp: true, icon: Users, iconBg: 'bg-blue-600/30 text-[#00d2ff] border-blue-500/40' },
+      { label: '在岗施工人数', value: '82', change: '+3.8%', isUp: true, icon: User, iconBg: 'bg-blue-600/30 text-[#00d2ff] border-blue-500/40' },
+      { label: '高空防坠告警', value: '2', change: '0.0%', isUp: true, icon: AlertTriangle, iconBg: 'bg-amber-500/30 text-[#ffb300] border-amber-500/40' },
+      { label: '在线定位设备', value: '36', change: '+2.8%', isUp: true, icon: Cpu, iconBg: 'bg-cyan-500/30 text-[#00d2ff] border-cyan-500/40' },
+      { label: '桩腿合拢进度', value: '52.0%', change: '+1.5%', isUp: true, icon: Activity, iconBg: 'bg-emerald-500/30 text-[#00e676] border-emerald-500/40' },
+      { label: '垂直对位合格率', value: '100%', change: '0.0%', isUp: true, icon: Compass, iconBg: 'bg-indigo-500/30 text-[#8ab4f8] border-indigo-500/40' },
+    ]
+  }
+];
+
+// 6个停泊区域 (编号1~6) 移动码头与平船台配置 (只保留编号、名称与占用情况)
+export const DOCK_ZONES_CONFIG = [
+  {
+    dockId: 'ZONE-01',
+    zoneNumber: 1,
+    dockName: '1号船台（2万吨船台）',
+    maxCapacity: 2,
+    currentCount: 1,
+    top: '10%',
+    left: '68%',
+    borderColor: '#00d2ff',
+    glowColor: 'rgba(0, 210, 255, 0.22)'
+  },
+  {
+    dockId: 'ZONE-02',
+    zoneNumber: 2,
+    dockName: '2号码头',
+    maxCapacity: 3,
+    currentCount: 2,
+    top: '23%',
+    left: '68%',
+    borderColor: '#ffb300',
+    glowColor: 'rgba(255, 179, 0, 0.22)'
+  },
+  {
+    dockId: 'ZONE-03',
+    zoneNumber: 3,
+    dockName: '3号码头',
+    maxCapacity: 2,
+    currentCount: 1,
+    top: '43%',
+    left: '68%',
+    borderColor: '#38bdf8',
+    glowColor: 'rgba(56, 189, 248, 0.22)'
+  },
+  {
+    dockId: 'ZONE-04',
+    zoneNumber: 4,
+    dockName: '4号浮动码头',
+    maxCapacity: 2,
+    currentCount: 1,
+    top: '56%',
+    left: '68%',
+    borderColor: '#a855f7',
+    glowColor: 'rgba(168, 85, 247, 0.22)'
+  },
+  {
+    dockId: 'ZONE-05',
+    zoneNumber: 5,
+    dockName: '5号码头',
+    maxCapacity: 1,
+    currentCount: 1,
+    top: '69%',
+    left: '68%',
+    borderColor: '#00e676',
+    glowColor: 'rgba(0, 230, 118, 0.22)'
+  },
+  {
+    dockId: 'ZONE-06',
+    zoneNumber: 6,
+    dockName: '6号船台（平船台）',
+    maxCapacity: 3,
+    currentCount: 1,
+    top: '82%',
+    left: '68%',
+    borderColor: '#f4511e',
+    glowColor: 'rgba(244, 81, 30, 0.22)'
+  }
+];
+
+// 6个区域下的在建造船项目与港作船只数据 (去掉了区域和码头信息)
+export const IN_CONSTRUCTION_SHIP_PARKINGS = [
+  {
+    projectId: 'PRJ-2026-LNG01',
+    name: '17.4万m³ 薄膜型大型LNG船',
+    zoneNumber: 1,
+    phase: '合拢焊接',
+    progress: 45,
+    badgeColor: '#00d2ff',
+    workers: 186
+  },
+  {
+    projectId: 'PRJ-2026-PCTC05',
+    name: '17.5万吨 PCTC双燃料汽车船',
+    zoneNumber: 2,
+    phase: '舾装系统调试',
+    progress: 72,
+    badgeColor: '#ffb300',
+    workers: 115
+  },
+  {
+    projectId: 'PRJ-2026-BULK04',
+    name: '8.2万吨 卡姆萨尔型散货船',
+    zoneNumber: 2,
+    phase: '分段搭载',
+    progress: 30,
+    badgeColor: '#00e676',
+    workers: 76
+  },
+  {
+    projectId: 'PRJ-2026-CTN02',
+    name: '24000TEU 超大型集装箱船',
+    zoneNumber: 3,
+    phase: '系泊试验',
+    progress: 85,
+    badgeColor: '#38bdf8',
+    workers: 142
+  },
+  {
+    projectId: 'PRJ-2026-WIND06',
+    name: '1500吨 自升式风电安装船',
+    zoneNumber: 4,
+    phase: '桩腿合拢搭设',
+    progress: 52,
+    badgeColor: '#a855f7',
+    workers: 88
+  },
+  {
+    projectId: 'TUG-2026-01',
+    name: '5000马力 港作拖轮 (海工拖01)',
+    zoneNumber: 5,
+    phase: '驻泊护航巡备',
+    progress: 100,
+    badgeColor: '#00e676',
+    workers: 12,
+    isTugboat: true
+  },
+  {
+    projectId: 'PRJ-2026-VLCC03',
+    name: '30万吨级 超大型原油船(VLCC)',
+    zoneNumber: 6,
+    phase: '密闭涂装',
+    progress: 60,
+    badgeColor: '#f4511e',
+    workers: 98
   }
 ];
 
@@ -542,21 +865,23 @@ const yardAlerts = [
 ];
 
 const yardDeviceTypes = [
-  { name: '定位基站', value: 45.3, color: '#00a2ff' },
-  { name: '信标标签', value: 30.1, color: '#00c2cb' },
-  { name: '定位手环', value: 15.6, color: '#ff9800' },
-  { name: '其他设备', value: 9.0, color: '#f4511e' },
+  { name: '主基站', value: 38.0, color: '#00d2ff' },
+  { name: '气体探测器', value: 28.0, color: '#00e676' },
+  { name: '声光报警器', value: 22.0, color: '#ff9800' },
+  { name: '摄像头', value: 12.0, color: '#a855f7' },
 ];
 
 const yardDeviceList = [
-  { id: '基站-01', type: '定位基站', status: '在线', location: '1#船台', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
-  { id: '基站-02', type: '定位基站', status: '在线', location: '总装车间', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
-  { id: '信标-001', type: '信标标签', status: '在线', location: '分段车间A区', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
-  { id: '信标-002', type: '信标标签', status: '离线', location: '仓储区', statusColor: 'text-[#ffb300]', dotColor: 'bg-[#ffb300]' },
-  { id: '手环-045', type: '定位手环', status: '在线', location: '机舱车间', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
-  { id: '信标-003', type: '信标标签', status: '故障', location: '涂装车间', statusColor: 'text-[#ff1744]', dotColor: 'bg-[#ff1744]' },
-  { id: '基站-03', type: '定位基站', status: '在线', location: '2#船台东侧', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
-  { id: '手环-088', type: '定位手环', status: '在线', location: '码头南区', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'BS-01 (11号主基站)', type: '主基站', status: '在线', location: '制造部边跨路口', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'BS-02 (7号主基站)', type: '主基站', status: '在线', location: '2万吨船台尾段', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'GD-01 (四合一气体仪)', type: '气体探测器', status: '在线', location: '517-9号船机舱', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'GD-02 (氧气/CO探头)', type: '气体探测器', status: '在线', location: '519-1机舱', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'AL-01 (防爆声光警报)', type: '声光报警器', status: '在线', location: '145-3机舱', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'CAM-01 (香烟识别摄像头)', type: '摄像头', status: '在线', location: '制造部烟火高危区', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'CAM-02 (安全帽识别摄像头)', type: '摄像头', status: '在线', location: '2万吨船台登船口', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' },
+  { id: 'BS-03 (5号主基站)', type: '主基站', status: '离线', location: '机电仓库', statusColor: 'text-[#ffb300]', dotColor: 'bg-[#ffb300]' },
+  { id: 'GD-03 (硫化氢监测探头)', type: '气体探测器', status: '故障', location: '平船台机舱', statusColor: 'text-[#ff1744]', dotColor: 'bg-[#ff1744]' },
+  { id: 'CAM-04 (反光衣识别摄像头)', type: '摄像头', status: '在线', location: '4号浮动码头路口', statusColor: 'text-[#00e676]', dotColor: 'bg-[#00e676]' }
 ];
 
 // 厂区全景图空间电子围栏多边形定义 (与电子围栏模块保持名称、编码、危险级别、关联设备及点位完全一致)
@@ -971,6 +1296,76 @@ const PROJECT_ELECTRONIC_FENCES: Record<string, SpatialElectronicFence[]> = {
       ],
       todayViolations: 0
     }
+  ],
+  'PRJ-2026-PCTC05': [
+    {
+      id: 'FENCE-PCTC-01',
+      name: '艉部滚装跳板液压测试警戒区',
+      code: 'EF-PCTC-001',
+      scopeType: 'project',
+      projectId: 'PRJ-2026-PCTC05',
+      projectName: '17.5万吨 PCTC双燃料汽车运输船',
+      dangerLevel: 'high',
+      points: '24,28 62,28 66,56 20,56',
+      strokeColor: '#f59e0b',
+      fillColor: 'rgba(245, 158, 11, 0.25)',
+      labelX: 43,
+      labelY: 42,
+      statusBadge: {
+        x: 43,
+        y: 22,
+        title: '跳板收放测试',
+        subText: '液压 21MPa 正常',
+        statusColor: '#00e676'
+      },
+      details: {
+        areaType: '汽车运输船艉部重型滚装跳板调试区',
+        securityLevel: '一级机械联动防碾压/防坠警戒',
+        allowedRoles: '滚装调试工、液压钳工、安全员',
+        maxCapacity: 25,
+        currentOccupancy: 10
+      },
+      devices: [
+        { id: 'PCTC-ALM-01', name: '液压坡道声光警报器', type: '声光报警器', status: 'online' },
+        { id: 'PCTC-BS-W01', name: '滚装跳板作业面基站', type: '定位基站', status: 'online' }
+      ],
+      todayViolations: 1
+    }
+  ],
+  'PRJ-2026-WIND06': [
+    {
+      id: 'FENCE-WIND-01',
+      name: '自升桩腿50m高空合拢警戒区',
+      code: 'EF-WIND-001',
+      scopeType: 'project',
+      projectId: 'PRJ-2026-WIND06',
+      projectName: '1500吨 自升式海上风电安装船',
+      dangerLevel: 'high',
+      points: '20,22 55,22 58,52 18,52',
+      strokeColor: '#a855f7',
+      fillColor: 'rgba(168, 85, 247, 0.26)',
+      labelX: 38,
+      labelY: 37,
+      statusBadge: {
+        x: 38,
+        y: 18,
+        title: '3#桩腿高空搭设',
+        subText: '双钩绳索安全率 100%',
+        statusColor: '#00e676'
+      },
+      details: {
+        areaType: '自升式风电安装船高空桁架桩腿合拢区',
+        securityLevel: '特级高空防坠落管制区',
+        allowedRoles: '高空合拢焊工、重型起重指挥、安全监督',
+        maxCapacity: 20,
+        currentOccupancy: 8
+      },
+      devices: [
+        { id: 'WIND-ALM-01', name: '1200T绕桩吊防碰报警器', type: '声光报警器', status: 'online' },
+        { id: 'WIND-BS-W01', name: '桩腿高空作业面基站', type: '定位基站', status: 'online' }
+      ],
+      todayViolations: 2
+    }
   ]
 };
 
@@ -1056,19 +1451,19 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
     valueText: '骨干同步中 · 信号优秀'
   },
 
-  // 2. 作业面基站 (高精密集覆盖节点)
+  // 2. 作业面基站 (归类为主基站)
   {
     id: 'DEV-BS-WORK-01',
-    name: '数控下料切割工位基站',
-    category: 'work_station',
-    categoryLabel: '作业面基站',
+    name: '数控下料切割工位主基站',
+    category: 'main_station',
+    categoryLabel: '主基站',
     code: 'BS-W-01',
     location: '智能下料流水线支架',
     top: '62%',
     left: '44%',
     status: 'online',
     coverageRadius: 75,
-    coverageColor: '#38bdf8',
+    coverageColor: '#00d2ff',
     battery: '94% (太阳能/锂电)',
     frequency: '无线信道 CH5 (高精频段)',
     power: '18dBm (覆盖 R:90m)',
@@ -1076,16 +1471,16 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   },
   {
     id: 'DEV-BS-WORK-02',
-    name: '1#船台合拢作业面基站',
-    category: 'work_station',
-    categoryLabel: '作业面基站',
+    name: '1#船台合拢作业主基站',
+    category: 'main_station',
+    categoryLabel: '主基站',
     code: 'BS-W-02',
     location: '1号码头船台外板支架',
     top: '16%',
     left: '18%',
     status: 'online',
     coverageRadius: 70,
-    coverageColor: '#38bdf8',
+    coverageColor: '#00d2ff',
     battery: '88% (锂电池)',
     frequency: '无线信道 CH2 (高精频段)',
     power: '18dBm (覆盖 R:85m)',
@@ -1093,16 +1488,16 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   },
   {
     id: 'DEV-BS-WORK-03',
-    name: 'S105轮甲板舾装基站',
-    category: 'work_station',
-    categoryLabel: '作业面基站',
+    name: 'S105轮甲板舾装主基站',
+    category: 'main_station',
+    categoryLabel: '主基站',
     code: 'BS-W-03',
     location: 'S105轮舾装主甲板挂篮',
     top: '42%',
     left: '77%',
     status: 'online',
     coverageRadius: 65,
-    coverageColor: '#38bdf8',
+    coverageColor: '#00d2ff',
     battery: '96%',
     frequency: '无线信道 CH3 (高精频段)',
     power: '16dBm (覆盖 R:80m)',
@@ -1112,9 +1507,9 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   // 3. 气体检测仪 (密闭与受限空间气体传感)
   {
     id: 'DEV-GAS-01',
-    name: '钢材车间防爆气体监测仪',
+    name: '钢材车间防爆气体探测器',
     category: 'gas_detector',
-    categoryLabel: '气体检测仪',
+    categoryLabel: '气体探测器',
     code: 'GAS-01',
     location: '预处理下料切割下风口',
     top: '72%',
@@ -1129,9 +1524,9 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   },
   {
     id: 'DEV-GAS-02',
-    name: '龙门吊合拢舱段气体仪',
+    name: '龙门吊合拢舱段气体探测器',
     category: 'gas_detector',
-    categoryLabel: '气体检测仪',
+    categoryLabel: '气体探测器',
     code: 'GAS-02',
     location: '合拢分段底舱通风口',
     top: '32%',
@@ -1149,7 +1544,7 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   {
     id: 'DEV-ALM-01',
     name: '龙门吊吊运防碰声光报警器',
-    category: 'alarm_light',
+    category: 'alarm',
     categoryLabel: '声光报警器',
     code: 'ALM-01',
     location: '龙门吊主小车吊钩滑道',
@@ -1165,8 +1560,8 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
   },
   {
     id: 'DEV-ALM-02',
-    name: '钢材运输通道防撞报警器',
-    category: 'alarm_light',
+    name: '钢材运输通道防撞警报器',
+    category: 'alarm',
     categoryLabel: '声光报警器',
     code: 'ALM-02',
     location: '预处理主干道路口道闸',
@@ -1179,6 +1574,42 @@ const YARD_SPATIAL_DEVICES: SpatialDevice[] = [
     frequency: 'Zigbee 2.4GHz',
     power: '声光覆盖 70m',
     valueText: '车辆穿行声光联动正常'
+  },
+
+  // 5. 摄像头 (AI智慧安防与违规识别)
+  {
+    id: 'DEV-CAM-01',
+    name: '香烟与烟火识别摄像头',
+    category: 'camera',
+    categoryLabel: '摄像头',
+    code: 'CAM-01',
+    location: '制造部边跨高危烟火监控点',
+    top: '28%',
+    left: '42%',
+    status: 'online',
+    coverageRadius: 55,
+    coverageColor: '#a855f7',
+    battery: '市电 100%',
+    frequency: 'RTSP 4K/30fps',
+    power: '视场角 110°',
+    valueText: 'AI吸烟/明火检测使能 · 运行正常'
+  },
+  {
+    id: 'DEV-CAM-02',
+    name: '登船安全帽识别摄像头',
+    category: 'camera',
+    categoryLabel: '摄像头',
+    code: 'CAM-02',
+    location: '2万吨船台登船天梯口',
+    top: '15%',
+    left: '24%',
+    status: 'online',
+    coverageRadius: 50,
+    coverageColor: '#a855f7',
+    battery: '市电 100%',
+    frequency: 'RTSP 1080P',
+    power: '视场角 90°',
+    valueText: '安全帽/反光衣穿戴识别正常'
   }
 ];
 
@@ -1204,16 +1635,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'LNG-BS-W01',
-      name: '1#液货舱合拢作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '1#液货舱合拢主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'LNG-W01',
       location: '1#绝热箱合拢施工位',
       top: '32%',
       left: '32%',
       status: 'online',
       coverageRadius: 85,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '92%',
       frequency: '无线信道 CH5',
       power: '覆盖 1#货舱全段',
@@ -1221,16 +1652,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'LNG-BS-W02',
-      name: '机舱管路作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '机舱管路主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'LNG-W02',
       location: '艉部主推进机舱',
       top: '38%',
       left: '68%',
       status: 'online',
       coverageRadius: 80,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '90%',
       frequency: '无线信道 CH5',
       power: '覆盖机舱及泵舱',
@@ -1238,9 +1669,9 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'LNG-GAS-01',
-      name: '2#液货舱受限空间气体仪',
+      name: '2#液货舱受限空间气体探测器',
       category: 'gas_detector',
-      categoryLabel: '气体检测仪',
+      categoryLabel: '气体探测器',
       code: 'LNG-G01',
       location: '2#密闭货舱底部通道',
       top: '46%',
@@ -1256,7 +1687,7 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     {
       id: 'LNG-ALM-01',
       name: '甲板吊装防碰声光报警器',
-      category: 'alarm_light',
+      category: 'alarm',
       categoryLabel: '声光报警器',
       code: 'LNG-A01',
       location: '主甲板吊运口',
@@ -1272,16 +1703,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'LNG-BS-W03',
-      name: '艏楼压载舱作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '艏楼压载舱主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'LNG-W03',
       location: '艏楼压载水舱入孔',
       top: '30%',
       left: '20%',
       status: 'online',
       coverageRadius: 70,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '95%',
       frequency: '无线信道 CH3',
       power: '覆盖 艏楼隔离段',
@@ -1308,16 +1739,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'CTN-BS-W01',
-      name: '10#箱位导轨作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '10#箱位导轨主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'CTN-W01',
       location: '10#贝位导轨架垂直面',
       top: '36%',
       left: '36%',
       status: 'online',
       coverageRadius: 85,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '94%',
       frequency: '无线信道 CH4',
       power: '覆盖 8#-12#箱位货舱',
@@ -1325,16 +1756,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'CTN-BS-W02',
-      name: '电气中控室作业基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '电气中控室主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'CTN-W02',
       location: '主配电板与电气集控室',
       top: '32%',
       left: '54%',
       status: 'online',
       coverageRadius: 75,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '96%',
       frequency: '无线信道 CH4',
       power: '覆盖 配电控制室',
@@ -1343,7 +1774,7 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     {
       id: 'CTN-ALM-01',
       name: '艏艉系泊舷梯落水报警器',
-      category: 'alarm_light',
+      category: 'alarm',
       categoryLabel: '声光报警器',
       code: 'CTN-A01',
       location: '右舷系泊甲板临水通道',
@@ -1359,9 +1790,9 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'CTN-GAS-01',
-      name: '主机舱通风气体检测仪',
+      name: '主机舱通风气体探测器',
       category: 'gas_detector',
-      categoryLabel: '气体检测仪',
+      categoryLabel: '气体探测器',
       code: 'CTN-G01',
       location: '主推进主机舱底排风道',
       top: '42%',
@@ -1395,9 +1826,9 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'VLCC-GAS-01',
-      name: '货油泵舱防爆气体检测仪',
+      name: '货油泵舱防爆气体探测器',
       category: 'gas_detector',
-      categoryLabel: '气体检测仪',
+      categoryLabel: '气体探测器',
       code: 'VLCC-G01',
       location: '货油泵舱封闭底层',
       top: '42%',
@@ -1412,16 +1843,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'VLCC-BS-W01',
-      name: '1号隔舱防爆定位基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '1号隔舱防爆主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'VLCC-W01',
       location: '1号隔离空舱顶板',
       top: '34%',
       left: '32%',
       status: 'online',
       coverageRadius: 80,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '91%',
       frequency: '无线信道 CH6',
       power: '覆盖 1#-2#隔舱',
@@ -1430,7 +1861,7 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     {
       id: 'VLCC-ALM-01',
       name: '货油管汇试压声光报警器',
-      category: 'alarm_light',
+      category: 'alarm',
       categoryLabel: '声光报警器',
       code: 'VLCC-A01',
       location: '甲板货油高压管汇端部',
@@ -1446,16 +1877,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'VLCC-BS-W02',
-      name: '艉部双层底作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '艉部双层底主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'VLCC-W02',
       location: '艉部双层底压载通道',
       top: '48%',
       left: '26%',
       status: 'online',
       coverageRadius: 75,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '89%',
       frequency: '无线信道 CH6',
       power: '覆盖 双层底涂装区',
@@ -1482,16 +1913,16 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'BULK-BS-W01',
-      name: '1#大舱舷梯口作业面基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '1#大舱舷梯口主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'BULK-W01',
       location: '1#大货舱舷梯口通道',
       top: '35%',
       left: '28%',
       status: 'online',
       coverageRadius: 80,
-      coverageColor: '#38bdf8',
+      coverageColor: '#00d2ff',
       battery: '93%',
       frequency: '无线信道 CH3',
       power: '覆盖 1#货舱内壁',
@@ -1499,9 +1930,9 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'BULK-GAS-01',
-      name: '双层底压载舱气体检测仪',
+      name: '双层底压载舱气体探测器',
       category: 'gas_detector',
-      categoryLabel: '气体检测仪',
+      categoryLabel: '气体探测器',
       code: 'BULK-G01',
       location: '散货船双层底压载舱',
       top: '46%',
@@ -1517,7 +1948,7 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     {
       id: 'BULK-ALM-01',
       name: '船台大件吊装防碰报警器',
-      category: 'alarm_light',
+      category: 'alarm',
       categoryLabel: '声光报警器',
       code: 'BULK-A01',
       location: '总组吊装龙门吊主横梁',
@@ -1533,9 +1964,9 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
     },
     {
       id: 'BULK-BS-W02',
-      name: '艉部分段搭载定位基站',
-      category: 'work_station',
-      categoryLabel: '作业面基站',
+      name: '艉部分段搭载主基站',
+      category: 'main_station',
+      categoryLabel: '主基站',
       code: 'BULK-W02',
       location: '艉部总组段合拢口',
       top: '38%',
@@ -1570,13 +2001,17 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
   // 面板显隐控制状态 (默认展示，点击背景滑动隐藏)
   const [isPanelsVisible, setIsPanelsVisible] = useState(true);
 
-  // 图层显隐与细分控制状态 (默认人员与设备均显示)
+  // 图层显隐与细分控制状态 (人员分布默认开启，设备分布默认关闭)
   const [showPersonnelLayer, setShowPersonnelLayer] = useState<boolean>(true);
-  const [showDeviceLayer, setShowDeviceLayer] = useState<boolean>(true);
+  const [showDeviceLayer, setShowDeviceLayer] = useState<boolean>(false);
   const [showFenceLayer, setShowFenceLayer] = useState<boolean>(true);
+  const [showShipDistributionLayer, setShowShipDistributionLayer] = useState<boolean>(true);
   const [selectedDeviceCategory, setSelectedDeviceCategory] = useState<DeviceCategoryType>('all');
   const [selectedDeviceDetail, setSelectedDeviceDetail] = useState<SpatialDevice | null>(null);
   const [selectedFenceDetail, setSelectedFenceDetail] = useState<SpatialElectronicFence | null>(null);
+  const [selectedWorkerDetail, setSelectedWorkerDetail] = useState<SpatialWorkerDetail | null>(null);
+  const [activeAlarmModalData, setActiveAlarmModalData] = useState<ActiveAlarmData | null>(null);
+  const [alarmNoticeToast, setAlarmNoticeToast] = useState<string | null>(null);
 
   // 轮播滚动 Refs
   const alertsScrollRef = useRef<HTMLDivElement>(null);
@@ -1635,11 +2070,17 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
     return `${y}-${m}-${d} ${h}:${min}:${s} 星期${week}`;
   };
 
-  // 点击背景图切换面板显隐
-  const handleBackgroundClick = () => {
-    setIsProjectDropdownOpen(false);
-    setSelectedDeviceDetail(null);
-    setSelectedFenceDetail(null);
+  // 点击背景图切换面板显隐 (优先保障位于背景图之上的具体组件与定位点位事件，若有打开的弹窗优先关闭弹窗)
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedDeviceDetail || selectedFenceDetail || selectedWorkerDetail || activeAlarmModalData || isProjectDropdownOpen) {
+      setIsProjectDropdownOpen(false);
+      setSelectedDeviceDetail(null);
+      setSelectedFenceDetail(null);
+      setSelectedWorkerDetail(null);
+      setActiveAlarmModalData(null);
+      return;
+    }
     setIsPanelsVisible(prev => !prev);
   };
 
@@ -1675,18 +2116,20 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
 
   return (
     <div 
-      onClick={handleBackgroundClick}
-      className="fixed inset-0 z-50 bg-[#020b14] text-[#e2f1ff] overflow-hidden flex flex-col font-sans select-none cursor-pointer"
-      title={isPanelsVisible ? "点击背景空白处可收起所有数据面板" : "点击背景可展开数据面板"}
+      className="fixed inset-0 z-50 bg-[#020b14] text-[#e2f1ff] overflow-hidden flex flex-col font-sans select-none"
     >
       
-      {/* 1. 3D 全景/船模背景图（根据所选项目实时无缝切换，等比例缩放不拉伸） */}
-      <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-[#020b14] pointer-events-none transition-all duration-700">
+      {/* 1. 3D 全景/船模背景图 (明确设置为 z-0 基层，按页面同高设置尺寸宽屏显示) */}
+      <div 
+        onClick={handleBackgroundClick}
+        className="absolute inset-0 z-0 overflow-hidden flex items-center justify-center bg-[#020b14] pointer-events-auto transition-all duration-700 cursor-pointer"
+        title={isPanelsVisible ? "点击背景空白处可收起所有数据面板" : "点击背景可展开数据面板"}
+      >
         <img 
           key={currentBackgroundImage}
           src={currentBackgroundImage} 
           alt={viewScope === 'yard' ? '智慧船厂全景' : currentProject.name} 
-          className="w-full h-full object-cover object-center select-none animate-fadeIn transition-all duration-700"
+          className="w-full h-full min-h-screen object-cover object-center select-none animate-fadeIn transition-all duration-700 pointer-events-none"
         />
         {/* 造船项目视角专属的科幻光栅与蓝图微光覆层 */}
         {viewScope === 'project' && (
@@ -1695,16 +2138,17 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
       </div>
 
       {/* ===================== 全画幅空间矢量标定图层 (全屏百分比对齐背景图) ===================== */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-20">
         
         {/* 1. 空间电子围栏多边形与工业作业状态浮标图层 (受 showFenceLayer 开关控制) */}
         {showFenceLayer && (
           <div className="absolute inset-0 pointer-events-none">
-            {/* SVG 多边形矢量图层 */}
+            {/* SVG 多边形矢量图层 (确保 SVG 本身透传点位，而 polygon 精准响应单击与发光悬停) */}
             <svg 
-              className="absolute inset-0 w-full h-full pointer-events-none" 
+              className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" 
               viewBox="0 0 100 100" 
               preserveAspectRatio="none"
+              style={{ pointerEvents: 'none' }}
             >
               <defs>
                 <filter id="fence-glow-filter" x="-20%" y="-20%" width="140%" height="140%">
@@ -1716,10 +2160,11 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
               {currentFences.map((fence) => (
                 <g 
                   key={fence.id}
-                  className="pointer-events-auto cursor-pointer group"
+                  className="cursor-pointer group pointer-events-auto"
+                  style={{ pointerEvents: 'all' }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedFenceDetail(fence);
+                    setSelectedFenceDetail(prev => prev?.id === fence.id ? null : fence);
                   }}
                 >
                   {/* 多边形区域 (半透明彩色填充 + 发光霓虹边框) */}
@@ -1727,14 +2172,15 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                     points={fence.points}
                     fill={fence.fillColor}
                     stroke={fence.strokeColor}
-                    strokeWidth="0.35"
+                    strokeWidth="0.4"
                     strokeLinejoin="round"
                     strokeLinecap="round"
                     filter="url(#fence-glow-filter)"
-                    className="transition-all duration-300 group-hover:opacity-90 group-hover:stroke-white cursor-pointer pointer-events-auto"
+                    className="transition-all duration-300 group-hover:opacity-95 group-hover:stroke-white cursor-pointer pointer-events-auto"
+                    style={{ pointerEvents: 'all' }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedFenceDetail(fence);
+                      setSelectedFenceDetail(prev => prev?.id === fence.id ? null : fence);
                     }}
                   />
                 </g>
@@ -1743,14 +2189,14 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
 
             {/* 电子围栏区域中心名称标签 & 附图工业作业状态浮标看板 */}
             {currentFences.map((fence) => (
-              <div key={`fence-labels-${fence.id}`} className="contents">
+              <React.Fragment key={`fence-labels-${fence.id}`}>
                 {/* A. 区域中心名称标签 */}
                 <div 
-                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer z-20 transition-transform duration-200 hover:scale-105"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer z-20 transition-transform duration-200 hover:scale-105 p-2 -m-2"
                   style={{ top: `${fence.labelY}%`, left: `${fence.labelX}%` }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedFenceDetail(fence);
+                    setSelectedFenceDetail(prev => prev?.id === fence.id ? null : fence);
                   }}
                 >
                   <div 
@@ -1769,11 +2215,11 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                 {/* B. 附图作业状态浮标看板 (如: 龙门吊G-01: 安装已完成 100% / S105轮: 设备维护完成 85%) */}
                 {fence.statusBadge && (
                   <div 
-                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer z-25 group"
+                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer z-25 group p-2 -m-2"
                     style={{ top: `${fence.statusBadge.y}%`, left: `${fence.statusBadge.x}%` }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedFenceDetail(fence);
+                      setSelectedFenceDetail(prev => prev?.id === fence.id ? null : fence);
                     }}
                   >
                     <div className="bg-[#061833]/95 border border-[#1f4a7c] group-hover:border-[#00e5ff] rounded-xl px-2.5 py-1.5 text-[11px] shadow-[0_8px_24px_rgba(0,0,0,0.85)] backdrop-blur-md flex items-center gap-2.5 transition-all">
@@ -1794,7 +2240,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                     </div>
                   </div>
                 )}
-              </div>
+              </React.Fragment>
             ))}
           </div>
         )}
@@ -1805,11 +2251,11 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
             {activeFilteredDevices.map((dev) => (
               <div 
                 key={dev.id}
-                className="absolute pointer-events-auto transition-all z-20 group"
+                className="absolute pointer-events-auto transition-all z-20 group -translate-x-1/2 -translate-y-1/2 p-2"
                 style={{ top: dev.top, left: dev.left }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedDeviceDetail(dev);
+                  setSelectedDeviceDetail(prev => prev?.id === dev.id ? null : dev);
                 }}
               >
                 {/* 📡 动态信号覆盖范围光圈 (带脉冲扫描波纹与范围标尺) */}
@@ -1818,8 +2264,8 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                   style={{
                     width: `${dev.coverageRadius * 2}px`,
                     height: `${dev.coverageRadius * 2}px`,
-                    top: '12px',
-                    left: '12px',
+                    top: '50%',
+                    left: '50%',
                   }}
                 >
                   {/* 背景半透明径向辐射色 */}
@@ -1848,7 +2294,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
 
                 {/* 📍 设备核心发光图标徽标 */}
                 <div 
-                  className="relative -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-130"
+                  className="relative w-7 h-7 rounded-full border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-130"
                   style={{
                     backgroundColor: dev.coverageColor,
                     boxShadow: `0 0 16px ${dev.coverageColor}, inset 0 0 6px rgba(255,255,255,0.7)`
@@ -1856,13 +2302,13 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                   title={`点击查看设备: ${dev.name} (${dev.categoryLabel})`}
                 >
                   {dev.category === 'main_station' && <Radio className="w-3.5 h-3.5 text-white" />}
-                  {dev.category === 'work_station' && <Cpu className="w-3.5 h-3.5 text-white" />}
                   {dev.category === 'gas_detector' && <Wind className="w-3.5 h-3.5 text-white" />}
-                  {dev.category === 'alarm_light' && <Volume2 className="w-3.5 h-3.5 text-white" />}
+                  {dev.category === 'alarm' && <Volume2 className="w-3.5 h-3.5 text-white" />}
+                  {dev.category === 'camera' && <Camera className="w-3.5 h-3.5 text-white" />}
                 </div>
 
                 {/* 设备简易悬浮标签 (悬停时显现) */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-30">
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-30">
                   <div className="bg-[#061833]/95 border border-[#00d2ff]/80 text-[10px] text-white px-2 py-0.5 rounded shadow-lg whitespace-nowrap flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#00e676]"></span>
                     <span>{dev.name}</span>
@@ -1877,43 +2323,94 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
         {showPersonnelLayer && (
           <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-100">
             {viewScope === 'yard' ? (
-              YARD_SPATIAL_WORKERS.map((worker) => (
-                <div 
-                  key={worker.id}
-                  className="absolute pointer-events-auto z-20 group cursor-pointer"
-                  style={{ top: worker.top, left: worker.left }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
+              YARD_SPATIAL_WORKERS.map((worker) => {
+                const targetId = `W-2026-${worker.id}`;
+                return (
                   <div 
-                    className="w-5 h-5 rounded-full bg-[#00e676] border-2 border-white shadow-[0_0_12px_#00e676] flex items-center justify-center hover:scale-130 transition-transform cursor-pointer"
-                    title={`${worker.name} (${worker.role}) - ${worker.area}`}
+                    key={worker.id}
+                    className="absolute pointer-events-auto z-20 group cursor-pointer -translate-x-1/2 -translate-y-1/2 p-2"
+                    style={{ top: worker.top, left: worker.left }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedWorkerDetail(prev => prev?.id === targetId ? null : {
+                        id: targetId,
+                        name: worker.name,
+                        role: worker.role,
+                        status: worker.status === '在岗' ? 'online' : 'alarm',
+                        location: worker.area,
+                        projectName: '厂区全景作业区',
+                        time: formatDate(currentTime),
+                        battery: '95%',
+                        signalPower: '-64 dBm (优秀)',
+                        phone: '138-1234-5678',
+                        company: '江南造船总装一厂',
+                        wearables: ['防爆UWB定位手环 #HB-092', '智能安全帽传感器'],
+                        top: worker.top,
+                        left: worker.left
+                      });
+                    }}
                   >
-                    {worker.count > 1 ? (
-                      <span className="text-[9px] font-bold text-[#061833]">{worker.count}</span>
-                    ) : (
-                      <User className="w-3 h-3 text-[#061833]" />
-                    )}
-                  </div>
-                  
-                  {/* 人员悬浮快速标签 */}
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-30">
-                    <div className="bg-[#061833]/95 border border-[#00e676] text-[10px] text-white px-2 py-0.5 rounded shadow-lg whitespace-nowrap flex items-center gap-1">
-                      <span className="text-[#00e676] font-bold">{worker.name}</span>
-                      <span className="text-[#8ab4f8]">({worker.role})</span>
+                    <div 
+                      className="w-6 h-6 rounded-full bg-[#00e676] border-2 border-white shadow-[0_0_12px_#00e676] flex items-center justify-center hover:scale-130 transition-transform cursor-pointer"
+                      title={`点击查看人员定位信息: ${worker.name} (${worker.role}) - ${worker.area}`}
+                    >
+                      {worker.count > 1 ? (
+                        <span className="text-[9px] font-bold text-[#061833]">{worker.count}</span>
+                      ) : (
+                        <User className="w-3.5 h-3.5 text-[#061833]" />
+                      )}
+                    </div>
+                    
+                    {/* 人员悬浮快速标签 */}
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-30">
+                      <div className="bg-[#061833]/95 border border-[#00e676] text-[10px] text-white px-2 py-0.5 rounded shadow-lg whitespace-nowrap flex items-center gap-1">
+                        <span className="text-[#00e676] font-bold">{worker.name}</span>
+                        <span className="text-[#8ab4f8]">({worker.role})</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               currentProject.markers.map((marker) => (
                 <div 
                   key={marker.id}
-                  className="absolute pointer-events-auto z-20 cursor-pointer"
+                  className="absolute pointer-events-auto z-20 cursor-pointer -translate-x-1/2 -translate-y-1/2 p-2"
                   style={{ top: marker.top, left: marker.left }}
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (marker.type === 'alarm') {
+                      setActiveAlarmModalData({
+                        id: `ALERT-${marker.id}`,
+                        time: formatDate(currentTime).split(' ')[1],
+                        name: marker.name,
+                        workerId: marker.id,
+                        role: marker.role,
+                        reason: `${marker.role}作业面未佩戴防护且触及禁入警戒线`,
+                        location: `${currentProject.name} - ${marker.role}作业区`,
+                        projectName: currentProject.name,
+                        dangerLevel: 'high',
+                        gasReading: '氧气 18.2% (偏低警告) | 可燃气 0%LEL',
+                        deviceLinked: 'LNG-GAS-01 气体检测仪 & 龙门吊防碰声光报警器',
+                        status: 'pending'
+                      });
+                    }
+                    setSelectedWorkerDetail(prev => prev?.id === marker.id ? null : {
+                      id: marker.id,
+                      name: marker.name,
+                      role: marker.role,
+                      status: marker.type,
+                      location: `${currentProject.name} - ${marker.role}作业面`,
+                      projectName: currentProject.name,
+                      time: formatDate(currentTime),
+                      battery: marker.type === 'offline' ? '12% (低电)' : '88%',
+                      signalPower: '-68 dBm (良好)',
+                      phone: '139-8765-4321',
+                      company: `${currentProject.shipType}建造工程部`,
+                      wearables: ['防爆定位手环', '气密作业感知徽章'],
+                      top: marker.top,
+                      left: marker.left
+                    });
                   }}
                 >
                   <div 
@@ -1924,13 +2421,106 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                         ? 'bg-[#ffb300] shadow-[0_0_10px_#ffb300]'
                         : 'bg-[#00e676] shadow-[0_0_10px_#00e676]'
                     }`}
-                    title={`${marker.name} (${marker.role})`}
+                    title={`点击查看人员定位信息: ${marker.name} (${marker.role})`}
                   >
                     <User className="w-3.5 h-3.5 text-white" />
                   </div>
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* 4. 6个停泊区域 (编号1~6) 精简图层 (仅在全景模式 viewScope === 'yard' 下显示) */}
+        {viewScope === 'yard' && showShipDistributionLayer && (
+          <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-100">
+            {DOCK_ZONES_CONFIG.map((dock) => {
+              const zoneShips = IN_CONSTRUCTION_SHIP_PARKINGS.filter((s) => s.zoneNumber === dock.zoneNumber);
+              return (
+                <div 
+                  key={dock.dockId}
+                  className="absolute pointer-events-auto flex flex-col items-start select-none transition-all duration-300"
+                  style={{
+                    top: dock.top,
+                    left: dock.left
+                  }}
+                >
+                  {/* 1) 码头精简主体条：只留编号、名称和当前占用情况 */}
+                  <div 
+                    className="rounded-full bg-[#061833]/95 border px-3 py-1 text-xs flex items-center gap-2 shadow-[0_4px_16px_rgba(0,0,0,0.85)] backdrop-blur-md"
+                    style={{
+                      borderColor: dock.borderColor,
+                      boxShadow: `0 0 14px ${dock.glowColor}`
+                    }}
+                  >
+                    {/* 编号 */}
+                    <span 
+                      className="w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[11px] text-white shrink-0 shadow"
+                      style={{ backgroundColor: dock.borderColor }}
+                    >
+                      {dock.zoneNumber}
+                    </span>
+
+                    {/* 名称 */}
+                    <span className="font-bold text-white text-xs">{dock.dockName}</span>
+
+                    {/* 当前占用情况 */}
+                    <span className="bg-[#00e676]/20 text-[#00e676] text-[10px] px-2 py-0.5 rounded-full border border-[#00e676]/40 font-bold font-mono">
+                      {dock.currentCount}/{dock.maxCapacity}艘
+                    </span>
+                  </div>
+
+                  {/* 2) 造船项目与码头信息条缩进跟进显示 */}
+                  {zoneShips.length > 0 && (
+                    <div className="ml-3.5 pl-2.5 border-l-2 border-dashed border-[#8ab4f8]/40 mt-1 flex flex-col gap-1.5">
+                      {zoneShips.map((ship) => {
+                        const isSelected = viewScope === 'project' && currentProject.id === ship.projectId;
+                        return (
+                          <div 
+                            key={ship.projectId}
+                            className={`bg-[#061833]/92 border hover:border-[#00d2ff] rounded-xl px-2.5 py-1.5 text-xs backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.7)] flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02] ${
+                              isSelected ? 'ring-2 ring-[#00d2ff] bg-[#0c2e5a]' : ''
+                            }`}
+                            style={{ borderColor: isSelected ? '#00d2ff' : `${ship.badgeColor}88` }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (ship.isTugboat) {
+                                const targetProj = projectListConfig.find(p => p.id === 'PRJ-2026-PCTC05');
+                                if (targetProj) {
+                                  setSelectedProjectId(targetProj.id);
+                                  setViewScope('project');
+                                }
+                                return;
+                              }
+                              const existProj = projectListConfig.find(p => p.id === ship.projectId);
+                              if (existProj) {
+                                setSelectedProjectId(ship.projectId);
+                                setViewScope('project');
+                              }
+                            }}
+                            title="点击查看项目详情"
+                          >
+                            <Ship className="w-3.5 h-3.5 text-[#00e5ff] shrink-0" />
+                            <span className="font-bold text-white text-xs truncate max-w-[165px]">{ship.name}</span>
+                            <span className="text-[#00e676] font-mono font-bold text-[10px] whitespace-nowrap">
+                              {ship.progress}% ({ship.phase})
+                            </span>
+                            <span className="text-gray-300 font-mono text-[10px] whitespace-nowrap">
+                              {ship.workers}人在岗
+                            </span>
+                            {isSelected && (
+                              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#00d2ff]/20 text-[#00d2ff] border border-[#00d2ff]/40 font-medium">
+                                当前孪生
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -2051,72 +2641,315 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
           </div>
         )}
 
-        {/* 📱 5. 点击空间设备弹出的参数卡片 */}
+        {/* 📱 5. 点击空间设备弹出的冒泡参数卡片 (靠近元件位置显示，点击实现开关) */}
         {selectedDeviceDetail && (
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-24 left-1/2 -translate-x-1/2 w-80 bg-[#061833]/95 border backdrop-blur-xl rounded-2xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.85)] z-50 animate-fadeIn pointer-events-auto"
-            style={{ borderColor: selectedDeviceDetail.coverageColor, boxShadow: `0 0 28px ${selectedDeviceDetail.coverageColor}55` }}
+            className="absolute z-50 animate-fadeIn pointer-events-auto transition-all duration-200"
+            style={{
+              top: selectedDeviceDetail.top,
+              left: selectedDeviceDetail.left,
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-18px'
+            }}
           >
-            <div className="flex items-center justify-between border-b border-[#1f4a7c]/80 pb-2.5 mb-2.5">
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center border"
-                  style={{ 
-                    backgroundColor: `${selectedDeviceDetail.coverageColor}22`, 
-                    borderColor: selectedDeviceDetail.coverageColor,
-                    color: selectedDeviceDetail.coverageColor
-                  }}
-                >
-                  {selectedDeviceDetail.category === 'main_station' && <Radio className="w-4 h-4" />}
-                  {selectedDeviceDetail.category === 'work_station' && <Cpu className="w-4 h-4" />}
-                  {selectedDeviceDetail.category === 'gas_detector' && <Wind className="w-4 h-4" />}
-                  {selectedDeviceDetail.category === 'alarm_light' && <Volume2 className="w-4 h-4" />}
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white leading-none">{selectedDeviceDetail.name}</h4>
-                  <span className="text-[10px] text-[#8ab4f8] font-mono">{selectedDeviceDetail.code} · {selectedDeviceDetail.categoryLabel}</span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setSelectedDeviceDetail(null)}
-                className="text-[#8ab4f8] hover:text-white p-1 rounded-full hover:bg-white/10 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <div className="w-80 bg-[#061833]/95 border border-[#00e5ff] backdrop-blur-xl rounded-2xl p-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.85),0_0_24px_rgba(0,229,255,0.35)] relative text-[#e2f1ff]">
+              {/* 向下指向的冒泡小小三角 */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#061833] border-r border-b border-[#00e5ff] rotate-45"></div>
 
-            <div className="space-y-2 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-[#8ab4f8]">安装物理位置:</span>
-                <span className="text-white font-medium truncate max-w-[170px]">{selectedDeviceDetail.location}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#8ab4f8]">在线运行状态:</span>
-                <span className="text-[#00e676] font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00e676] animate-pulse"></span>
-                  在线正常
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#8ab4f8]">信号频段:</span>
-                <span className="font-mono text-[#d0e5ea]">{selectedDeviceDetail.frequency}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#8ab4f8]">覆盖指标:</span>
-                <span className="font-mono text-[#00e5ff] font-bold">{selectedDeviceDetail.power || `R: ${selectedDeviceDetail.coverageRadius}m 范围`}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#8ab4f8]">电池/供电:</span>
-                <span className="font-mono text-[#00e676]">{selectedDeviceDetail.battery}</span>
-              </div>
-              {selectedDeviceDetail.valueText && (
-                <div className="mt-2 pt-2 border-t border-[#1f4a7c]/60 bg-[#092244]/70 p-2 rounded-lg">
-                  <div className="text-[10px] text-[#8ab4f8]">实时监测/负载信息:</div>
-                  <div className="text-xs font-mono font-bold text-white mt-0.5">{selectedDeviceDetail.valueText}</div>
+              <div className="flex items-center justify-between border-b border-[#1f4a7c]/80 pb-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div 
+                    className="w-7 h-7 rounded-lg flex items-center justify-center border shrink-0"
+                    style={{ 
+                      backgroundColor: `${selectedDeviceDetail.coverageColor}22`, 
+                      borderColor: selectedDeviceDetail.coverageColor,
+                      color: selectedDeviceDetail.coverageColor
+                    }}
+                  >
+                    {selectedDeviceDetail.category === 'main_station' && <Radio className="w-4 h-4" />}
+                    {selectedDeviceDetail.category === 'gas_detector' && <Wind className="w-4 h-4" />}
+                    {selectedDeviceDetail.category === 'alarm' && <Volume2 className="w-4 h-4" />}
+                    {selectedDeviceDetail.category === 'camera' && <Camera className="w-4 h-4" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-white leading-none truncate">{selectedDeviceDetail.name}</h4>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/40 flex items-center gap-1 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#00e676] animate-pulse"></span>
+                        在线
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-[#8ab4f8] font-mono block mt-0.5">{selectedDeviceDetail.code} · {selectedDeviceDetail.categoryLabel}</span>
+                  </div>
                 </div>
-              )}
+                <button 
+                  onClick={() => setSelectedDeviceDetail(null)}
+                  className="text-[#8ab4f8] hover:text-white p-1 rounded-full hover:bg-white/10 cursor-pointer shrink-0 ml-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="space-y-1.5 text-[11px]">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">安装物理位置:</span>
+                  <span className="text-white font-medium truncate max-w-[170px]">{selectedDeviceDetail.location}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">覆盖指标:</span>
+                  <span className="font-mono text-[#00e5ff] font-bold">{selectedDeviceDetail.power || `R: ${selectedDeviceDetail.coverageRadius}m 范围`}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">电池/供电:</span>
+                  <span className="font-mono text-[#00e676]">{selectedDeviceDetail.battery}</span>
+                </div>
+                {selectedDeviceDetail.valueText && (
+                  <div className="mt-2 pt-1.5 border-t border-[#1f4a7c]/60 bg-[#092244]/70 p-2 rounded-lg">
+                    <div className="text-[10px] text-[#8ab4f8]">实时监测/负载信息:</div>
+                    <div className="text-xs font-mono font-bold text-white mt-0.5">{selectedDeviceDetail.valueText}</div>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* 👤 6. 点击人员头像弹出的冒泡定位卡片 (靠近元件位置显示，无蒙层，点击实现开关) */}
+        {selectedWorkerDetail && (
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="absolute z-50 animate-fadeIn pointer-events-auto transition-all duration-200 select-none"
+            style={{
+              top: selectedWorkerDetail.top || '40%',
+              left: selectedWorkerDetail.left || '50%',
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-18px'
+            }}
+          >
+            <div className="w-80 bg-[#061833]/95 border-2 border-[#00e676] rounded-2xl p-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.85),0_0_24px_rgba(0,230,118,0.35)] backdrop-blur-xl relative text-[#e2f1ff]">
+              {/* 向下指向的冒泡小三角 */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#061833] border-r border-b border-[#00e676] rotate-45"></div>
+
+              {/* 标题栏 */}
+              <div className="flex items-center justify-between border-b border-[#1f4a7c] pb-2 mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#00e676]/20 border border-[#00e676] flex items-center justify-center text-[#00e676] shrink-0">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
+                      <span>{selectedWorkerDetail.name}</span>
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold border ${
+                        selectedWorkerDetail.status === 'alarm' || selectedWorkerDetail.status === '告警'
+                          ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse'
+                          : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                      }`}>
+                        {selectedWorkerDetail.status === 'alarm' || selectedWorkerDetail.status === '告警' ? '🔴 告警' : '🟢 在岗'}
+                      </span>
+                    </h3>
+                    <p className="text-[10px] text-[#8ab4f8] mt-0.5 font-mono">
+                      工号: {selectedWorkerDetail.id} · {selectedWorkerDetail.role}
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setSelectedWorkerDetail(null)}
+                  className="text-[#8ab4f8] hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* 内容 */}
+              <div className="space-y-1.5 text-[11px]">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">班组组织:</span>
+                  <span className="text-white font-medium">{selectedWorkerDetail.company || '造船施工一部'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">联系电话:</span>
+                  <span className="text-white font-mono">{selectedWorkerDetail.phone || '138-1234-5678'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8] flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#00e5ff]" />
+                    当前位置:
+                  </span>
+                  <span className="font-bold text-[#00e5ff] truncate max-w-[170px]">{selectedWorkerDetail.location}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#8ab4f8]">关联基站:</span>
+                  <span className="text-white font-mono text-[10px]">{selectedWorkerDetail.baseStation || `${selectedWorkerDetail.location.split(' ')[0] || '厂区'}主基站`}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-[#1f4a7c]/60 text-[10px]">
+                  <span className="text-[#8ab4f8]">终端电量: <strong className="text-[#00e676] font-mono">{selectedWorkerDetail.battery || '95%'}</strong></span>
+                  <span className="text-[#8ab4f8] flex items-center gap-1">
+                    <Wifi className="w-3 h-3 text-[#00e5ff]" />
+                    <strong className="text-[#00e5ff] font-mono">{selectedWorkerDetail.signalPower || '-64 dBm'}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* 轨迹回放 */}
+              <div className="mt-2.5 pt-2 border-t border-[#1f4a7c]">
+                <button
+                  onClick={() => {
+                    setAlarmNoticeToast(`已调取【${selectedWorkerDetail.name}】今日作业行动轨迹`);
+                    setTimeout(() => setAlarmNoticeToast(null), 3000);
+                  }}
+                  className="w-full py-1.5 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400 text-xs font-bold text-[#00e5ff] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_12px_rgba(0,229,255,0.2)]"
+                >
+                  <Crosshair className="w-3.5 h-3.5 text-[#00e5ff]" />
+                  <span>查看轨迹回放</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🚨 告警明显提示窗 (触发告警时弹出) */}
+        {activeAlarmModalData && (
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-lg flex items-center justify-center p-4 animate-fadeIn pointer-events-auto select-none"
+          >
+            <div className="w-full max-w-lg bg-[#0b121e]/95 border-2 border-red-500 rounded-3xl p-6 shadow-[0_0_60px_rgba(239,68,68,0.7)] relative backdrop-blur-2xl text-white overflow-hidden">
+              
+              {/* 警示斜纹装饰 */}
+              <div className="absolute top-0 left-0 right-0 h-2 bg.repeating-linear-gradient(45deg,#ef4444,#ef4444_12px,#1e293b_12px,#1e293b_24px)]"></div>
+              <div className="absolute -top-20 -right-20 w-56 h-56 bg-red-600/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
+              {/* 标题 */}
+              <div className="flex items-start justify-between border-b border-red-500/40 pb-4 mb-4 mt-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)] animate-bounce shrink-0">
+                    <ShieldAlert className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-extrabold tracking-wider text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+                        紧急安全告警提示
+                      </h2>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500 text-white animate-pulse">
+                        HIGH-RISK ALARM
+                      </span>
+                    </div>
+                    <p className="text-xs text-red-300/80 mt-0.5">
+                      感知网络检测到现场触发重大安防风险，请立即进行处置与对讲！
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setActiveAlarmModalData(null)}
+                  className="text-slate-400 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* 内容详情 */}
+              <div className="space-y-3">
+                
+                {/* 告警事件 */}
+                <div className="bg-red-950/40 border border-red-500/50 p-3.5 rounded-2xl">
+                  <div className="text-xs text-red-300 font-medium">违规告警原因:</div>
+                  <div className="text-base font-bold text-white mt-1 flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-amber-400 shrink-0 animate-pulse" />
+                    <span className="text-amber-300">{activeAlarmModalData.reason}</span>
+                  </div>
+                </div>
+
+                {/* 信息网格 */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-[#09182d] p-3 rounded-xl border border-[#173863]">
+                    <div className="text-slate-400 text-[11px]">告警人员</div>
+                    <div className="text-white font-bold text-sm mt-0.5 flex items-center gap-1.5">
+                      <User className="w-4 h-4 text-[#00d2ff]" />
+                      <span>{activeAlarmModalData.name}</span>
+                      <span className="text-[10px] text-slate-400 font-normal">({activeAlarmModalData.role})</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#09182d] p-3 rounded-xl border border-[#173863]">
+                    <div className="text-slate-400 text-[11px]">触发时间</div>
+                    <div className="text-[#00e5ff] font-mono font-bold text-sm mt-0.5 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-[#00e5ff]" />
+                      <span>{activeAlarmModalData.time}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#09182d] p-3 rounded-xl border border-[#173863]">
+                    <div className="text-slate-400 text-[11px]">触发位置舱段</div>
+                    <div className="text-amber-200 font-bold mt-0.5 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span className="truncate">{activeAlarmModalData.location}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#09182d] p-3 rounded-xl border border-[#173863]">
+                    <div className="text-slate-400 text-[11px]">所属造船项目</div>
+                    <div className="text-white font-medium mt-0.5 truncate">
+                      {activeAlarmModalData.projectName || currentProject.name}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 传感器环境与设备 */}
+                <div className="bg-[#09182d] p-3 rounded-xl border border-[#173863] space-y-1.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">气体监测传感器读数:</span>
+                    <span className="font-mono font-bold text-red-400">
+                      {activeAlarmModalData.gasReading || '氧气 18.2% (偏低警告) | 可燃气 0%'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">现场联动设备:</span>
+                    <span className="text-[#00e5ff] font-medium">
+                      {activeAlarmModalData.deviceLinked || 'LNG-GAS-01 气体检测仪 & 声光报警器'}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 处置按钮 */}
+              <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-700/80">
+                <button
+                  onClick={() => {
+                    setAlarmNoticeToast(`已对区域【${activeAlarmModalData.location}】发出高音广播避险对讲！`);
+                    setTimeout(() => setAlarmNoticeToast(null), 3500);
+                  }}
+                  className="flex-1 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500 text-xs font-bold text-amber-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>现场紧急广播</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAlarmNoticeToast(`告警【${activeAlarmModalData.reason}】已确认处置并归档解除。`);
+                    setActiveAlarmModalData(null);
+                    setTimeout(() => setAlarmNoticeToast(null), 3500);
+                  }}
+                  className="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(239,68,68,0.5)]"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>确认并清除告警</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* 📢 顶部 Toast 操作提示 */}
+        {alarmNoticeToast && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#00d2ff] text-[#031326] px-5 py-2 rounded-full font-bold text-xs shadow-[0_0_25px_rgba(0,210,255,0.8)] border border-white animate-fadeIn flex items-center gap-2 pointer-events-none">
+            <Sparkles className="w-4 h-4 text-blue-900 animate-spin" />
+            <span>{alarmNoticeToast}</span>
           </div>
         )}
       </div>
@@ -2166,7 +2999,8 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
             <div className="flex items-center bg-[#071d3d]/90 p-0.5 rounded-full border border-[#1f4a7c] shadow-[0_0_16px_rgba(0,210,255,0.25)]">
               {/* 厂区视图按钮 */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setViewScope('yard');
                   setIsProjectDropdownOpen(false);
                 }}
@@ -2182,7 +3016,10 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
 
               {/* 造船项目视图按钮 */}
               <button
-                onClick={() => setViewScope('project')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewScope('project');
+                }}
                 className={`px-4 py-1 text-[12px] font-bold tracking-wider transition-all duration-300 rounded-full flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   viewScope === 'project'
                     ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_14px_rgba(0,210,255,0.7)]'
@@ -2292,11 +3129,40 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
             />
           </div>
 
+          {/* 🚨 模拟触发告警测试按钮 */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveAlarmModalData({
+                id: `ALERT-EMERGENCY-${Date.now()}`,
+                time: formatDate(currentTime).split(' ')[1],
+                name: '李强 (组长)',
+                workerId: 'LNG20260421',
+                role: '高级焊接技师',
+                reason: '1#液货舱绝热合拢受限空间气体指标异常',
+                location: '1#液货舱绝热合拢受限空间底部',
+                projectName: currentProject.name,
+                dangerLevel: 'high',
+                gasReading: '氧气 17.8% (严重偏低) | 可燃气 0%LEL',
+                deviceLinked: 'LNG-GAS-01 气体检测仪 & 龙门吊防碰报警器',
+                status: 'pending'
+              });
+            }}
+            className="px-2.5 py-1 text-xs border border-red-500 bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer shadow-[0_0_12px_rgba(239,68,68,0.5)] animate-pulse"
+            title="触发紧急告警明显提示窗"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+            <span className="font-bold">触发告警测试</span>
+          </button>
+
           <div className="h-4 w-px bg-[#1f4a7c]/60"></div>
 
           {/* 显隐面板切换浮动按钮 */}
           <button 
-            onClick={() => setIsPanelsVisible(!isPanelsVisible)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPanelsVisible(!isPanelsVisible);
+            }}
             className={`px-2.5 py-1 text-xs border rounded-full transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
               isPanelsVisible 
                 ? 'border-[#1f4a7c] bg-[#0b2447]/70 text-[#8ab4f8] hover:text-white hover:border-[#00d2ff]' 
@@ -2319,9 +3185,9 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
       </header>
 
       {/* 3. 核心大屏布局（带平滑滑动隐藏/展开动效与动态数据联动） */}
-      <div className="relative z-20 flex-1 flex gap-3 px-4 pb-3 overflow-hidden">
+      <div className="relative z-30 flex-1 flex gap-3 px-4 pb-3 overflow-hidden pointer-events-none">
         
-        {/* 🎯 人员分布 / 设备分布 浮动图层控制工具栏 (在全景模式下平滑滑动靠左贴边展示，始终可交互操作) */}
+        {/* 🎯 人员分布 / 设备分布 浮动图层控制工具面板 (精美工业数字孪生科技风) */}
         <div 
           onClick={(e) => e.stopPropagation()} 
           onMouseDown={(e) => e.stopPropagation()}
@@ -2330,73 +3196,129 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
             isPanelsVisible ? 'left-[350px]' : 'left-4'
           }`}
         >
-          {/* 左侧主控制块：人员分布 & 设备分布 双开关 */}
-          <div className="flex flex-col gap-2">
-            {/* 1. 人员分布开关方块 */}
-            <div 
+          {/* 图层控制核心面板 */}
+          <div className="bg-[#061833]/92 border border-[#00d2ff]/40 rounded-2xl p-2 shadow-[0_12px_32px_rgba(0,0,0,0.7),0_0_20px_rgba(0,210,255,0.15)] backdrop-blur-xl flex flex-col gap-1.5 w-[122px]">
+            {/* 面板头部 */}
+            <div className="flex items-center justify-between pb-1 border-b border-[#1f4a7c]/60 px-1 mb-0.5">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-[#e2f1ff] tracking-wider">
+                <Layers className="w-3 h-3 text-[#00d2ff]" />
+                <span>图层</span>
+              </div>
+              <span className="text-[8px] font-mono text-[#00e5ff] bg-[#00e5ff]/10 px-1 py-0.2 rounded border border-[#00e5ff]/30">
+                {viewScope === 'yard' ? '全景' : '项目'}
+              </span>
+            </div>
+
+            {/* 1. 人员 */}
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowPersonnelLayer(prev => !prev);
               }}
-              className={`w-[74px] h-[74px] bg-[#12363b]/90 border rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.5)] backdrop-blur-md cursor-pointer transition-all duration-200 ${
-                showPersonnelLayer ? 'border-[#00e5ff] shadow-[0_0_12px_rgba(0,229,255,0.3)]' : 'border-[#2b7277]/80 hover:border-[#00d2ff]/80'
+              className={`w-full px-2 py-1.5 rounded-xl border text-xs flex items-center justify-between gap-1.5 cursor-pointer transition-all duration-200 ${
+                showPersonnelLayer 
+                  ? 'bg-gradient-to-r from-[#00d2ff]/25 to-[#0b2447]/90 border-[#00d2ff] text-white shadow-[0_0_12px_rgba(0,210,255,0.25)]' 
+                  : 'bg-[#0b2447]/40 border-[#1f4a7c]/60 text-[#8ab4f8] hover:border-[#00d2ff]/60 hover:text-white'
               }`}
               title={showPersonnelLayer ? "点击隐藏人员分布" : "点击显示人员分布"}
             >
-              {/* Toggle 开关 */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowPersonnelLayer(prev => !prev);
-                }}
-                className={`w-9 h-5 rounded-full p-0.5 transition-colors relative flex items-center cursor-pointer ${
-                  showPersonnelLayer ? 'bg-[#2995ff] shadow-[0_0_8px_rgba(41,149,255,0.7)]' : 'bg-[#1b2b36]'
-                }`}
-              >
-                <span 
-                  className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                    showPersonnelLayer ? 'translate-x-4' : 'translate-x-0'
-                  }`} 
-                />
-              </button>
-              <span className="text-xs text-[#e2f1ff] font-medium tracking-wide whitespace-nowrap">
-                人员分布
-              </span>
-            </div>
+              <div className="flex items-center gap-1.5">
+                <Users className={`w-3.5 h-3.5 ${showPersonnelLayer ? 'text-[#00e5ff]' : 'text-[#8ab4f8]'}`} />
+                <span className="font-medium whitespace-nowrap">人员</span>
+              </div>
+              {/* 科技平滑开关 */}
+              <div className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative flex items-center shrink-0 ${
+                showPersonnelLayer ? 'bg-[#00e5ff] shadow-[0_0_8px_#00e5ff]' : 'bg-[#1b2b36]'
+              }`}>
+                <div className={`w-2.5 h-2.5 rounded-full bg-[#061833] shadow transform transition-transform duration-200 ${
+                  showPersonnelLayer ? 'translate-x-2.5' : 'translate-x-0'
+                }`} />
+              </div>
+            </button>
 
-            {/* 2. 设备分布开关方块 */}
-            <div 
+            {/* 2. 设备 */}
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDeviceLayer(prev => !prev);
               }}
-              className={`w-[74px] h-[74px] bg-[#12363b]/90 border rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.5)] backdrop-blur-md cursor-pointer transition-all duration-200 ${
-                showDeviceLayer ? 'border-[#00e5ff] shadow-[0_0_14px_rgba(0,229,255,0.35)]' : 'border-[#2b7277]/80 hover:border-[#00d2ff]/80'
+              className={`w-full px-2 py-1.5 rounded-xl border text-xs flex items-center justify-between gap-1.5 cursor-pointer transition-all duration-200 ${
+                showDeviceLayer 
+                  ? 'bg-gradient-to-r from-[#00d2ff]/25 to-[#0b2447]/90 border-[#00d2ff] text-white shadow-[0_0_12px_rgba(0,210,255,0.25)]' 
+                  : 'bg-[#0b2447]/40 border-[#1f4a7c]/60 text-[#8ab4f8] hover:border-[#00d2ff]/60 hover:text-white'
               }`}
               title={showDeviceLayer ? "点击隐藏设备分布" : "点击展开设备分布与类型查询"}
             >
-              {/* Toggle 开关 */}
+              <div className="flex items-center gap-1.5">
+                <Cpu className={`w-3.5 h-3.5 ${showDeviceLayer ? 'text-[#00e5ff]' : 'text-[#8ab4f8]'}`} />
+                <span className="font-medium whitespace-nowrap">设备</span>
+              </div>
+              <div className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative flex items-center shrink-0 ${
+                showDeviceLayer ? 'bg-[#00e5ff] shadow-[0_0_8px_#00e5ff]' : 'bg-[#1b2b36]'
+              }`}>
+                <div className={`w-2.5 h-2.5 rounded-full bg-[#061833] shadow transform transition-transform duration-200 ${
+                  showDeviceLayer ? 'translate-x-2.5' : 'translate-x-0'
+                }`} />
+              </div>
+            </button>
+
+            {/* 3. 区域 */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFenceLayer(prev => !prev);
+              }}
+              className={`w-full px-2 py-1.5 rounded-xl border text-xs flex items-center justify-between gap-1.5 cursor-pointer transition-all duration-200 ${
+                showFenceLayer 
+                  ? 'bg-gradient-to-r from-[#00d2ff]/25 to-[#0b2447]/90 border-[#00d2ff] text-white shadow-[0_0_12px_rgba(0,210,255,0.25)]' 
+                  : 'bg-[#0b2447]/40 border-[#1f4a7c]/60 text-[#8ab4f8] hover:border-[#00d2ff]/60 hover:text-white'
+              }`}
+              title={showFenceLayer ? "点击隐藏区域划分" : "点击显示区域划分"}
+            >
+              <div className="flex items-center gap-1.5">
+                <Layers className={`w-3.5 h-3.5 ${showFenceLayer ? 'text-[#00e5ff]' : 'text-[#8ab4f8]'}`} />
+                <span className="font-medium whitespace-nowrap">区域</span>
+              </div>
+              <div className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative flex items-center shrink-0 ${
+                showFenceLayer ? 'bg-[#00e5ff] shadow-[0_0_8px_#00e5ff]' : 'bg-[#1b2b36]'
+              }`}>
+                <div className={`w-2.5 h-2.5 rounded-full bg-[#061833] shadow transform transition-transform duration-200 ${
+                  showFenceLayer ? 'translate-x-2.5' : 'translate-x-0'
+                }`} />
+              </div>
+            </button>
+
+            {/* 4. 船只 (仅在全景视角 viewScope === 'yard' 时显示) */}
+            {viewScope === 'yard' && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowDeviceLayer(prev => !prev);
+                  setShowShipDistributionLayer(prev => !prev);
                 }}
-                className={`w-9 h-5 rounded-full p-0.5 transition-colors relative flex items-center cursor-pointer ${
-                  showDeviceLayer ? 'bg-[#2995ff] shadow-[0_0_8px_rgba(41,149,255,0.7)]' : 'bg-[#1b2b36]'
+                className={`w-full px-2 py-1.5 rounded-xl border text-xs flex items-center justify-between gap-1.5 cursor-pointer transition-all duration-200 ${
+                  showShipDistributionLayer 
+                    ? 'bg-gradient-to-r from-[#00d2ff]/25 to-[#0b2447]/90 border-[#00d2ff] text-white shadow-[0_0_12px_rgba(0,210,255,0.25)]' 
+                    : 'bg-[#0b2447]/40 border-[#1f4a7c]/60 text-[#8ab4f8] hover:border-[#00d2ff]/60 hover:text-white'
                 }`}
+                title={showShipDistributionLayer ? "点击隐藏6个在建项目船只停放分布" : "点击显示6个在建项目船只停放分布"}
               >
-                <span 
-                  className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                    showDeviceLayer ? 'translate-x-4' : 'translate-x-0'
-                  }`} 
-                />
+                <div className="flex items-center gap-1.5">
+                  <Ship className={`w-3.5 h-3.5 ${showShipDistributionLayer ? 'text-[#00e5ff]' : 'text-[#8ab4f8]'}`} />
+                  <span className="font-medium whitespace-nowrap">船只</span>
+                </div>
+                <div className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative flex items-center shrink-0 ${
+                  showShipDistributionLayer ? 'bg-[#00e5ff] shadow-[0_0_8px_#00e5ff]' : 'bg-[#1b2b36]'
+                }`}>
+                  <div className={`w-2.5 h-2.5 rounded-full bg-[#061833] shadow transform transition-transform duration-200 ${
+                    showShipDistributionLayer ? 'translate-x-2.5' : 'translate-x-0'
+                  }`} />
+                </div>
               </button>
-              <span className="text-xs text-[#e2f1ff] font-medium tracking-wide whitespace-nowrap">
-                设备分布
-              </span>
-            </div>
+            )}
           </div>
 
           {/* 🎯 当点击设备分布时再出现二级类型菜单查询，显示对应的设备信息 */}
@@ -2430,25 +3352,6 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                 )}
               </button>
 
-              {/* 作业面基站 */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedDeviceCategory('work_station');
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs text-left font-medium transition-all flex items-center justify-between cursor-pointer ${
-                  selectedDeviceCategory === 'work_station'
-                    ? 'text-[#00e5ff] font-bold bg-[#00e5ff]/20 border border-[#00e5ff]/50 shadow-[0_0_10px_rgba(0,229,255,0.3)]'
-                    : 'text-[#d0e5ea] hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <span>作业面基站</span>
-                {selectedDeviceCategory === 'work_station' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]"></span>
-                )}
-              </button>
-
               {/* 主基站 */}
               <button
                 type="button"
@@ -2468,7 +3371,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                 )}
               </button>
 
-              {/* 气体检测仪 */}
+              {/* 气体探测器 */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -2481,7 +3384,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                     : 'text-[#d0e5ea] hover:text-white hover:bg-white/10'
                 }`}
               >
-                <span>气体检测仪</span>
+                <span>气体探测器</span>
                 {selectedDeviceCategory === 'gas_detector' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]"></span>
                 )}
@@ -2492,16 +3395,35 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedDeviceCategory('alarm_light');
+                  setSelectedDeviceCategory('alarm');
                 }}
                 className={`px-2.5 py-1 rounded-lg text-xs text-left font-medium transition-all flex items-center justify-between cursor-pointer ${
-                  selectedDeviceCategory === 'alarm_light'
+                  selectedDeviceCategory === 'alarm'
                     ? 'text-[#00e5ff] font-bold bg-[#00e5ff]/20 border border-[#00e5ff]/50 shadow-[0_0_10px_rgba(0,229,255,0.3)]'
                     : 'text-[#d0e5ea] hover:text-white hover:bg-white/10'
                 }`}
               >
                 <span>声光报警器</span>
-                {selectedDeviceCategory === 'alarm_light' && (
+                {selectedDeviceCategory === 'alarm' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]"></span>
+                )}
+              </button>
+
+              {/* 摄像头 */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedDeviceCategory('camera');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs text-left font-medium transition-all flex items-center justify-between cursor-pointer ${
+                  selectedDeviceCategory === 'camera'
+                    ? 'text-[#00e5ff] font-bold bg-[#00e5ff]/20 border border-[#00e5ff]/50 shadow-[0_0_10px_rgba(0,229,255,0.3)]'
+                    : 'text-[#d0e5ea] hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>摄像头</span>
+                {selectedDeviceCategory === 'camera' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]"></span>
                 )}
               </button>
@@ -2511,7 +3433,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
         
         {/* ===================== 左侧面板 (向左滑入/滑出) ===================== */}
         <div 
-          className={`w-[330px] flex flex-col gap-2 shrink-0 transition-all duration-500 ease-in-out relative ${
+          className={`w-[330px] flex flex-col gap-2 shrink-0 transition-all duration-500 ease-in-out relative pointer-events-auto ${
             isPanelsVisible ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
           }`}
         >
@@ -2816,15 +3738,8 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                     <span className="whitespace-nowrap truncate">{item.label}</span>
                   </div>
 
-                  <div className="text-lg font-bold font-mono text-[#e2f1ff] my-0.5 tracking-tight whitespace-nowrap">
+                  <div className="text-lg font-bold font-mono text-[#e2f1ff] mt-1 tracking-tight whitespace-nowrap">
                     {item.value}
-                  </div>
-
-                  <div className="text-[10px] text-[#557696] flex items-center gap-1 whitespace-nowrap">
-                    <span className="whitespace-nowrap">较昨日</span>
-                    <span className={`whitespace-nowrap font-mono ${item.change.startsWith('+') ? 'text-[#ff1744]' : 'text-[#00e676]'}`}>
-                      {item.change}
-                    </span>
                   </div>
                 </div>
               ))}
@@ -2835,7 +3750,7 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
 
         {/* ===================== 右侧面板 (向右滑入/滑出) ===================== */}
         <div 
-          className={`w-[330px] flex flex-col gap-2 shrink-0 transition-all duration-500 ease-in-out ${
+          className={`w-[330px] flex flex-col gap-2 shrink-0 transition-all duration-500 ease-in-out pointer-events-auto ${
             isPanelsVisible ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0 pointer-events-none'
           }`}
         >
@@ -2869,7 +3784,24 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
               {currentAlerts.map((alert, idx) => (
                 <div 
                   key={idx} 
-                  className="flex items-center text-[11px] py-1 px-2 bg-[#0b2447]/60 hover:bg-[#0f3466]/80 rounded-xl border border-[#1a4473]/50 transition-colors whitespace-nowrap"
+                  className="flex items-center text-[11px] py-1 px-2 bg-[#0b2447]/60 hover:bg-[#0f3466]/80 rounded-xl border border-[#1a4473]/50 transition-colors whitespace-nowrap cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveAlarmModalData({
+                      id: `ALERT-${idx + 1}`,
+                      time: alert.time,
+                      name: alert.name,
+                      workerId: `W-${idx + 1}`,
+                      role: '作业施工人员',
+                      reason: alert.reason,
+                      location: alert.location,
+                      projectName: viewScope === 'yard' ? '江南造船厂区' : currentProject.name,
+                      dangerLevel: 'high',
+                      gasReading: '氧气 19.1% | 可燃气 0%LEL',
+                      deviceLinked: 'UWB基站 & 声光报警器',
+                      status: 'pending'
+                    });
+                  }}
                 >
                   <Bell className="w-3 h-3 text-[#ff1744] mr-1.5 shrink-0 animate-bounce" />
                   <span className="font-mono text-[#8ab4f8] w-9 shrink-0 whitespace-nowrap">{alert.time}</span>
@@ -2977,7 +3909,30 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
                 {currentDeviceList.map((device, idx) => (
                   <div 
                     key={idx} 
-                    className="flex items-center text-[11px] py-1 px-2 hover:bg-[#0f3466]/60 rounded-lg transition-colors whitespace-nowrap"
+                    className="flex items-center text-[11px] py-1 px-2 hover:bg-[#0f3466]/60 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeviceLayer(true);
+                      setSelectedDeviceCategory('all');
+                      const matched = activeFilteredDevices.find(d => d.code === device.id || d.name.includes(device.id)) || {
+                        id: `DEV-LIST-${idx}`,
+                        name: `设备 ${device.id}`,
+                        category: 'work_station',
+                        categoryLabel: device.type,
+                        code: device.id,
+                        location: device.location,
+                        top: '40%',
+                        left: '50%',
+                        status: device.status === '正常' || device.status === '在线' ? 'online' : device.status === '故障' ? 'alarm' : 'offline',
+                        coverageRadius: 60,
+                        coverageColor: device.status === '正常' || device.status === '在线' ? '#38bdf8' : device.status === '故障' ? '#ff1744' : '#8ab4f8',
+                        battery: '92%',
+                        frequency: '2.4GHz UWB',
+                        power: '覆盖 50m',
+                        valueText: `监测状态: ${device.status}`
+                      };
+                      setSelectedDeviceDetail(matched);
+                    }}
                   >
                     <div className="w-1/4 text-[#e2f1ff] font-mono whitespace-nowrap truncate">{device.id}</div>
                     <div className="w-1/4 text-[#8ab4f8] whitespace-nowrap truncate">{device.type}</div>

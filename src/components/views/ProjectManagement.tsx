@@ -276,7 +276,8 @@ export function ProjectManagement() {
       setEditingProject(null);
     } else {
       // 创建新项目
-      setProjects([savedData, ...projects]);
+      setProjects(prev => [savedData, ...prev]);
+      handleResetSearch();
       setSuccessBanner(`成功创建工程项目【${savedData.name}】（编码：${savedData.id}），已成功绑定船模！`);
     }
     setTimeout(() => {

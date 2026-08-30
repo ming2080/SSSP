@@ -31,7 +31,8 @@ export interface BaseStationDevice {
   seq: number;
   code: string;           // 基站编码
   name: string;           // 基站名称
-  project: string;        // 所属项目
+  associationType?: 'global' | 'project'; // 关联模式: 全厂通用设备 | 造船项目
+  project: string;        // 所属项目或全厂通用
   status: '在线' | '离线'; // 基站状态
   recycleStatus: string;  // 基站回收状态（设备安装、临时撤场等）
   location: string;       // 安装位置
@@ -53,7 +54,8 @@ export interface GasDetectorDevice {
   createdAt: string;       // 创建时间
   sn: string;              // 设备SN
   name: string;            // 设备名称
-  project: string;         // 所属项目
+  associationType?: 'global' | 'project'; // 关联模式: 全厂通用设备 | 造船项目
+  project: string;         // 所属项目或全厂通用
   location: string;        // 安装位置
   floor?: string;          // 安装楼层
   gasType?: string;        // 检测气体类型
@@ -67,7 +69,8 @@ export interface AlarmDevice {
   createdAt: string;       // 创建时间
   sn: string;              // 设备SN
   name: string;            // 设备名称
-  project: string;         // 所属项目
+  associationType?: 'global' | 'project'; // 关联模式: 全厂通用设备 | 造船项目
+  project: string;         // 所属项目或全厂通用
   location: string;        // 安装位置
   floor?: string;          // 安装楼层
   decibel?: string;        // 报警声级dB
@@ -81,7 +84,8 @@ export interface CameraDevice {
   name: string;            // 设备名称 (如 香烟识别摄像头)
   modelCategory: string;   // 模型类别 (如 --)
   apiUrl: string;          // API接口
-  project: string;         // 所属项目
+  associationType?: 'global' | 'project'; // 关联模式: 全厂通用设备 | 造船项目
+  project: string;         // 所属项目或全厂通用
   createdAt: string;       // 创建时间
   isStreaming: boolean;    // 推流状态 (true: 推流中, false: 停止推流)
   rtspUrl?: string;        // RTSP视频流
@@ -94,7 +98,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 1,
     code: '115D6DBC4AD7592E54',
     name: '11（使用中）',
-    project: '东南造船厂',
+    associationType: 'global',
+    project: '全厂通用设备',
     status: '在线',
     recycleStatus: '设备安装',
     location: '制造部边跨路口',
@@ -113,7 +118,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 2,
     code: '115D6DBC4AD7593354',
     name: '7',
-    project: '东南造船厂',
+    associationType: 'project',
+    project: '17.4万方LNG运输船 (H1832)',
     status: '在线',
     recycleStatus: '设备安装',
     location: '2万吨船台尾段',
@@ -132,7 +138,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 3,
     code: '115D6DBC4AD7595354',
     name: '5（使用中）',
-    project: '东南造船厂',
+    associationType: 'project',
+    project: '24000TEU超大型集装箱船 (H1501)',
     status: '离线',
     recycleStatus: '设备安装',
     location: '机电仓库',
@@ -151,7 +158,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 4,
     code: '115D6DBC4AD7595754',
     name: '8',
-    project: '东南造船厂',
+    associationType: 'global',
+    project: '全厂通用设备',
     status: '离线',
     recycleStatus: '临时撤场',
     location: '登船口',
@@ -170,7 +178,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 5,
     code: '115D6DBC4AD7594A54',
     name: '13',
-    project: '东南造船厂',
+    associationType: 'project',
+    project: '30万吨级VLCC超级油轮 (S1058)',
     status: '离线',
     recycleStatus: '设备安装',
     location: '4号浮动码头路口',
@@ -189,7 +198,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 6,
     code: '115D6DBC4AD7591752',
     name: '15',
-    project: '东南造船厂',
+    associationType: 'global',
+    project: '全厂通用设备',
     status: '在线',
     recycleStatus: '设备安装',
     location: '北区办公楼',
@@ -208,7 +218,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 7,
     code: '115D6DBC4AD7595654',
     name: '14',
-    project: '东南造船厂',
+    associationType: 'project',
+    project: '17.4万方LNG运输船 (H1832)',
     status: '在线',
     recycleStatus: '设备安装',
     location: '一号轨道路口',
@@ -227,7 +238,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 8,
     code: '115D6DBC4AD7595454',
     name: '16',
-    project: '东南造船厂',
+    associationType: 'project',
+    project: '8.2万吨散货船工程 (H1208)',
     status: '在线',
     recycleStatus: '设备安装',
     location: '露天专焊10T中',
@@ -246,7 +258,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 9,
     code: '115D6DBC4AD7593054',
     name: '12',
-    project: '东南造船厂',
+    associationType: 'global',
+    project: '全厂通用设备',
     status: '在线',
     recycleStatus: '设备安装',
     location: '保障部十字路口',
@@ -265,7 +278,8 @@ const initialBaseStations: BaseStationDevice[] = [
     seq: 10,
     code: '115D6DBC4AD7593254',
     name: '11（6月2日 16点已拆）',
-    project: '东南造船厂',
+    associationType: 'global',
+    project: '全厂通用设备',
     status: '离线',
     recycleStatus: '临时撤场',
     location: '制造部边跨路口',
@@ -283,39 +297,39 @@ const initialBaseStations: BaseStationDevice[] = [
 
 // 初始数据：气体探测器 (1:1 匹配参考图 2)
 const initialGasDetectors: GasDetectorDevice[] = [
-  { id: 'GD-01', seq: 1, createdAt: '2026-08-20 14:32:59', sn: '866833080749440', name: '866833080749440', project: '东南造船厂', location: '517-9号船机舱', floor: '', gasType: '多气体四合一 (O2/CO/H2S/EX)', alarmThreshold: 'O2 < 19.5%' },
-  { id: 'GD-02', seq: 2, createdAt: '2026-08-20 14:32:46', sn: '866833080749051', name: '866833080749051', project: '东南造船厂', location: '519-1机舱', floor: '', gasType: '氧气/一氧化碳', alarmThreshold: 'CO > 30ppm' },
-  { id: 'GD-03', seq: 3, createdAt: '2026-08-20 14:32:32', sn: '866833080749630', name: '866833080749630', project: '东南造船厂', location: '平船台机舱', floor: '', gasType: '硫化氢监测探头', alarmThreshold: 'H2S > 10ppm' },
-  { id: 'GD-04', seq: 4, createdAt: '2026-08-20 14:32:17', sn: '866833080748954', name: '866833080748954', project: '东南造船厂', location: '', floor: '', gasType: '可燃气体 (EX)', alarmThreshold: 'EX > 20%LEL' },
-  { id: 'GD-05', seq: 5, createdAt: '2026-08-20 14:31:56', sn: '866833080749267', name: '866833080749267', project: '东南造船厂', location: '628-7', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准防爆设置' },
-  { id: 'GD-06', seq: 6, createdAt: '2026-08-20 14:31:41', sn: '866833080749283', name: '866833080749283', project: '东南造船厂', location: '628-8', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准防爆设置' },
-  { id: 'GD-07', seq: 7, createdAt: '2026-08-20 14:31:26', sn: '866833080749689', name: '866833080749689', project: '东南造船厂', location: '716-10机舱', floor: '', gasType: '氧气检测仪', alarmThreshold: 'O2 < 19.5%' },
-  { id: 'GD-08', seq: 8, createdAt: '2026-08-20 14:31:12', sn: '866833080909333', name: '866833080909333', project: '东南造船厂', location: '', floor: '', gasType: '一氧化碳检测', alarmThreshold: 'CO > 50ppm' },
-  { id: 'GD-09', seq: 9, createdAt: '2026-08-20 14:30:58', sn: '866833080749341', name: '866833080749341', project: '东南造船厂', location: '', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准设置' },
-  { id: 'GD-10', seq: 10, createdAt: '2026-08-20 14:30:42', sn: '866833080749317', name: '866833080749317', project: '东南造船厂', location: '14500-3机舱', floor: '', gasType: '硫化氢/VOC', alarmThreshold: 'VOC > 100ppm' }
+  { id: 'GD-01', seq: 1, createdAt: '2026-08-20 14:32:59', sn: '866833080749440', name: '866833080749440', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '517-9号船机舱', floor: '', gasType: '多气体四合一 (O2/CO/H2S/EX)', alarmThreshold: 'O2 < 19.5%' },
+  { id: 'GD-02', seq: 2, createdAt: '2026-08-20 14:32:46', sn: '866833080749051', name: '866833080749051', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '519-1机舱', floor: '', gasType: '氧气/一氧化碳', alarmThreshold: 'CO > 30ppm' },
+  { id: 'GD-03', seq: 3, createdAt: '2026-08-20 14:32:32', sn: '866833080749630', name: '866833080749630', associationType: 'project', project: '24000TEU超大型集装箱船 (H1501)', location: '平船台机舱', floor: '', gasType: '硫化氢监测探头', alarmThreshold: 'H2S > 10ppm' },
+  { id: 'GD-04', seq: 4, createdAt: '2026-08-20 14:32:17', sn: '866833080748954', name: '866833080748954', associationType: 'global', project: '全厂通用设备', location: '预处理车间', floor: '', gasType: '可燃气体 (EX)', alarmThreshold: 'EX > 20%LEL' },
+  { id: 'GD-05', seq: 5, createdAt: '2026-08-20 14:31:56', sn: '866833080749267', name: '866833080749267', associationType: 'project', project: '30万吨级VLCC超级油轮 (S1058)', location: '628-7机舱', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准防爆设置' },
+  { id: 'GD-06', seq: 6, createdAt: '2026-08-20 14:31:41', sn: '866833080749283', name: '866833080749283', associationType: 'project', project: '30万吨级VLCC超级油轮 (S1058)', location: '628-8机舱', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准防爆设置' },
+  { id: 'GD-07', seq: 7, createdAt: '2026-08-20 14:31:26', sn: '866833080749689', name: '866833080749689', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '716-10机舱', floor: '', gasType: '氧气检测仪', alarmThreshold: 'O2 < 19.5%' },
+  { id: 'GD-08', seq: 8, createdAt: '2026-08-20 14:31:12', sn: '866833080909333', name: '866833080909333', associationType: 'global', project: '全厂通用设备', location: '涂装车间', floor: '', gasType: '一氧化碳检测', alarmThreshold: 'CO > 50ppm' },
+  { id: 'GD-09', seq: 9, createdAt: '2026-08-20 14:30:58', sn: '866833080749341', name: '866833080749341', associationType: 'global', project: '全厂通用设备', location: '危化品仓库', floor: '', gasType: '四合一测气仪', alarmThreshold: '标准设置' },
+  { id: 'GD-10', seq: 10, createdAt: '2026-08-20 14:30:42', sn: '866833080749317', name: '866833080749317', associationType: 'project', project: '8.2万吨散货船工程 (H1208)', location: '14500-3机舱', floor: '', gasType: '硫化氢/VOC', alarmThreshold: 'VOC > 100ppm' }
 ];
 
 // 初始数据：声光报警器 (1:1 匹配参考图 3)
 const initialAlarms: AlarmDevice[] = [
-  { id: 'AL-01', seq: 1, createdAt: '2026-08-20 14:35:57', sn: '867655086345884', name: '867655086345884', project: '东南造船厂', location: '145-3机舱', floor: '', decibel: '110dB' },
-  { id: 'AL-02', seq: 2, createdAt: '2026-08-20 14:35:29', sn: '867655086341883', name: '867655086341883', project: '东南造船厂', location: '519-1机舱', floor: '', decibel: '105dB' },
-  { id: 'AL-03', seq: 3, createdAt: '2026-08-20 14:35:17', sn: '867655086341560', name: '867655086341560', project: '东南造船厂', location: '628-7机舱', floor: '', decibel: '110dB' },
-  { id: 'AL-04', seq: 4, createdAt: '2026-08-20 14:35:05', sn: '867655085879206', name: '867655085879206', project: '东南造船厂', location: '', floor: '', decibel: '100dB' },
-  { id: 'AL-05', seq: 5, createdAt: '2026-08-20 14:34:51', sn: '867655086346148', name: '867655086346148', project: '东南造船厂', location: '', floor: '', decibel: '115dB (防爆型)' },
-  { id: 'AL-06', seq: 6, createdAt: '2026-08-20 14:34:40', sn: '867655086344929', name: '867655086344929', project: '东南造船厂', location: '716-10机舱', floor: '', decibel: '110dB' },
-  { id: 'AL-07', seq: 7, createdAt: '2026-08-20 14:34:27', sn: '867655085878844', name: '867655085878844', project: '东南造船厂', location: '628-8机舱', floor: '', decibel: '105dB' },
-  { id: 'AL-08', seq: 8, createdAt: '2026-08-20 14:34:14', sn: '867655086346221', name: '867655086346221', project: '东南造船厂', location: '平船台机舱', floor: '', decibel: '110dB' },
-  { id: 'AL-09', seq: 9, createdAt: '2026-08-20 14:33:59', sn: '867655086347864', name: '867655086347864', project: '东南造船厂', location: '517-9号船机舱', floor: '', decibel: '110dB' },
-  { id: 'AL-10', seq: 10, createdAt: '2026-08-19 14:49:25', sn: '867655086345926', name: '867655086345926', project: '东南造船厂', location: '', floor: '', decibel: '105dB' }
+  { id: 'AL-01', seq: 1, createdAt: '2026-08-20 14:35:57', sn: '867655086345884', name: '867655086345884', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '145-3机舱', floor: '', decibel: '110dB' },
+  { id: 'AL-02', seq: 2, createdAt: '2026-08-20 14:35:29', sn: '867655086341883', name: '867655086341883', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '519-1机舱', floor: '', decibel: '105dB' },
+  { id: 'AL-03', seq: 3, createdAt: '2026-08-20 14:35:17', sn: '867655086341560', name: '867655086341560', associationType: 'project', project: '30万吨级VLCC超级油轮 (S1058)', location: '628-7机舱', floor: '', decibel: '110dB' },
+  { id: 'AL-04', seq: 4, createdAt: '2026-08-20 14:35:05', sn: '867655085879206', name: '867655085879206', associationType: 'global', project: '全厂通用设备', location: '气瓶集中存放区', floor: '', decibel: '100dB' },
+  { id: 'AL-05', seq: 5, createdAt: '2026-08-20 14:34:51', sn: '867655086346148', name: '867655086346148', associationType: 'global', project: '全厂通用设备', location: '配电中心', floor: '', decibel: '115dB (防爆型)' },
+  { id: 'AL-06', seq: 6, createdAt: '2026-08-20 14:34:40', sn: '867655086344929', name: '867655086344929', associationType: 'project', project: '24000TEU超大型集装箱船 (H1501)', location: '716-10机舱', floor: '', decibel: '110dB' },
+  { id: 'AL-07', seq: 7, createdAt: '2026-08-20 14:34:27', sn: '867655085878844', name: '867655085878844', associationType: 'project', project: '30万吨级VLCC超级油轮 (S1058)', location: '628-8机舱', floor: '', decibel: '105dB' },
+  { id: 'AL-08', seq: 8, createdAt: '2026-08-20 14:34:14', sn: '867655086346221', name: '867655086346221', associationType: 'project', project: '东南造船厂综合船台', location: '平船台机舱', floor: '', decibel: '110dB' },
+  { id: 'AL-09', seq: 9, createdAt: '2026-08-20 14:33:59', sn: '867655086347864', name: '867655086347864', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', location: '517-9号船机舱', floor: '', decibel: '110dB' },
+  { id: 'AL-10', seq: 10, createdAt: '2026-08-19 14:49:25', sn: '867655086345926', name: '867655086345926', associationType: 'global', project: '全厂通用设备', location: '变电站房', floor: '', decibel: '105dB' }
 ];
 
 // 初始数据：摄像头 (1:1 匹配参考图 4)
 const initialCameras: CameraDevice[] = [
-  { id: 'CAM-01', seq: 1, code: 'test-003', name: '香烟识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7571', project: '东南造船厂', createdAt: '2026-06-10 16:49:35', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/smoke_01' },
-  { id: 'CAM-02', seq: 2, code: 'test1006', name: '安全帽识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7570', project: '东南造船厂', createdAt: '2026-05-13 13:47:20', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/helmet_01' },
-  { id: 'CAM-03', seq: 3, code: 'test1005', name: '手机识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7572', project: '东南造船厂', createdAt: '2026-05-13 13:47:04', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/phone_01' },
-  { id: 'CAM-04', seq: 4, code: 'test1008', name: '反光衣未穿戴识别摄像头', modelCategory: '未穿戴防护检测', apiUrl: 'http://192.168.205.110:7573', project: '东南造船厂', createdAt: '2026-05-10 11:20:15', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/vest_01' },
-  { id: 'CAM-05', seq: 5, code: 'test1009', name: '烟火违章识别摄像头', modelCategory: '火灾烟雾识别', apiUrl: 'http://192.168.205.110:7574', project: '东南造船厂', createdAt: '2026-04-28 09:30:00', isStreaming: false, rtspUrl: 'rtsp://192.168.205.110:554/live/fire_01' }
+  { id: 'CAM-01', seq: 1, code: 'test-003', name: '香烟识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7571', associationType: 'global', project: '全厂通用设备', createdAt: '2026-06-10 16:49:35', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/smoke_01' },
+  { id: 'CAM-02', seq: 2, code: 'test1006', name: '安全帽识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7570', associationType: 'project', project: '17.4万方LNG运输船 (H1832)', createdAt: '2026-05-13 13:47:20', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/helmet_01' },
+  { id: 'CAM-03', seq: 3, code: 'test1005', name: '手机识别摄像头', modelCategory: '--', apiUrl: 'http://192.168.205.110:7572', associationType: 'global', project: '全厂通用设备', createdAt: '2026-05-13 13:47:04', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/phone_01' },
+  { id: 'CAM-04', seq: 4, code: 'test1008', name: '反光衣未穿戴识别摄像头', modelCategory: '未穿戴防护检测', apiUrl: 'http://192.168.205.110:7573', associationType: 'project', project: '24000TEU超大型集装箱船 (H1501)', createdAt: '2026-05-10 11:20:15', isStreaming: true, rtspUrl: 'rtsp://192.168.205.110:554/live/vest_01' },
+  { id: 'CAM-05', seq: 5, code: 'test1009', name: '烟火违章识别摄像头', modelCategory: '火灾烟雾识别', apiUrl: 'http://192.168.205.110:7574', associationType: 'project', project: '30万吨级VLCC超级油轮 (S1058)', createdAt: '2026-04-28 09:30:00', isStreaming: false, rtspUrl: 'rtsp://192.168.205.110:554/live/fire_01' }
 ];
 
 export function DeviceManagement() {
@@ -350,10 +364,21 @@ export function DeviceManagement() {
   // 表单临时编辑状态
   const [formFields, setFormFields] = useState<Record<string, any>>({});
 
-  // 所有涉及的项目下拉列表
-  const projectOptions = useMemo(() => {
-    return ['东南造船厂', '大船重工1号项目', '江南造船厂LNG项目'];
+  // 所有涉及的造船项目列表
+  const shipProjectOptions = useMemo(() => {
+    return [
+      '17.4万方LNG运输船 (H1832)',
+      '24000TEU超大型集装箱船 (H1501)',
+      '30万吨级VLCC超级油轮 (S1058)',
+      '8.2万吨散货船工程 (H1208)',
+      '东南造船厂综合船台'
+    ];
   }, []);
+
+  // 顶部筛选与表单用到的全量项目（包含全厂通用设备）
+  const projectOptions = useMemo(() => {
+    return ['全厂通用设备', ...shipProjectOptions];
+  }, [shipProjectOptions]);
 
   // 点击“查询/搜索”
   const handleSearch = () => {
@@ -440,12 +465,16 @@ export function DeviceManagement() {
   // 打开新增模态框
   const handleOpenCreate = () => {
     const timeStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const defaultAssociation = 'global';
+    const defaultProj = '全厂通用设备';
+
     if (activeTab === 'main_station') {
       const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase();
       setFormFields({
         code: `115D6DBC4AD7${randomHex}`,
         name: `${baseStations.length + 1}`,
-        project: selectedProject || '东南造船厂',
+        associationType: defaultAssociation,
+        project: defaultProj,
         status: '在线',
         recycleStatus: '设备安装',
         location: '制造部边跨路口',
@@ -461,7 +490,8 @@ export function DeviceManagement() {
         createdAt: timeStr,
         sn: randomSn,
         name: randomSn,
-        project: selectedProject || '东南造船厂',
+        associationType: defaultAssociation,
+        project: defaultProj,
         location: '517-9号船机舱',
         floor: '',
         gasType: '多气体四合一 (O2/CO/H2S/EX)',
@@ -473,7 +503,8 @@ export function DeviceManagement() {
         createdAt: timeStr,
         sn: randomSn,
         name: randomSn,
-        project: selectedProject || '东南造船厂',
+        associationType: defaultAssociation,
+        project: defaultProj,
         location: '145-3机舱',
         floor: '',
         decibel: '110dB'
@@ -484,7 +515,8 @@ export function DeviceManagement() {
         name: '未穿戴安全帽识别摄像头',
         modelCategory: '--',
         apiUrl: `http://192.168.205.110:${7570 + cameras.length}`,
-        project: selectedProject || '东南造船厂',
+        associationType: defaultAssociation,
+        project: defaultProj,
         createdAt: timeStr,
         isStreaming: true,
         rtspUrl: `rtsp://192.168.205.110:554/live/cam_${cameras.length + 1}`
@@ -493,10 +525,15 @@ export function DeviceManagement() {
     setModalMode('create');
   };
 
-  // 打开编辑模态框
+  // 打开编辑模态框 (完美识别全厂通用或指定造船项目)
   const handleOpenEdit = (item: any) => {
     setSelectedDevice(item);
-    setFormFields({ ...item });
+    const isGlobal = item.associationType === 'global' || item.project === '全厂通用设备';
+    setFormFields({
+      ...item,
+      associationType: isGlobal ? 'global' : 'project',
+      project: item.project || (isGlobal ? '全厂通用设备' : shipProjectOptions[0])
+    });
     setModalMode('edit');
   };
 
@@ -506,9 +543,16 @@ export function DeviceManagement() {
     setModalMode('detail');
   };
 
-  // 保存新增或修改
+  // 保存新增或修改 (处理全厂通用设备与造船项目配置关联及变更)
   const handleSaveForm = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 计算最终的关联模式与归属项目
+    const assocType = formFields.associationType || (formFields.project === '全厂通用设备' ? 'global' : 'project');
+    const finalProjectName = assocType === 'global' 
+      ? '全厂通用设备' 
+      : (formFields.project === '全厂通用设备' ? shipProjectOptions[0] : formFields.project);
+
     if (activeTab === 'main_station') {
       if (modalMode === 'create') {
         const newItem: BaseStationDevice = {
@@ -516,7 +560,8 @@ export function DeviceManagement() {
           seq: baseStations.length + 1,
           code: formFields.code || '',
           name: formFields.name || '',
-          project: formFields.project || '东南造船厂',
+          associationType: assocType,
+          project: finalProjectName,
           status: formFields.status || '在线',
           recycleStatus: formFields.recycleStatus || '设备安装',
           location: formFields.location || '厂区路口',
@@ -532,7 +577,12 @@ export function DeviceManagement() {
         };
         setBaseStations([newItem, ...baseStations]);
       } else if (modalMode === 'edit' && selectedDevice) {
-        setBaseStations(prev => prev.map(d => d.id === selectedDevice.id ? { ...d, ...formFields } : d));
+        setBaseStations(prev => prev.map(d => d.id === selectedDevice.id ? { 
+          ...d, 
+          ...formFields, 
+          associationType: assocType, 
+          project: finalProjectName 
+        } : d));
       }
     } else if (activeTab === 'gas_detector') {
       if (modalMode === 'create') {
@@ -542,7 +592,8 @@ export function DeviceManagement() {
           createdAt: formFields.createdAt || new Date().toISOString().replace('T', ' ').substring(0, 19),
           sn: formFields.sn || '',
           name: formFields.name || formFields.sn || '',
-          project: formFields.project || '东南造船厂',
+          associationType: assocType,
+          project: finalProjectName,
           location: formFields.location || '',
           floor: formFields.floor || '',
           gasType: formFields.gasType || '四合一测气仪',
@@ -550,7 +601,12 @@ export function DeviceManagement() {
         };
         setGasDetectors([newItem, ...gasDetectors]);
       } else if (modalMode === 'edit' && selectedDevice) {
-        setGasDetectors(prev => prev.map(d => d.id === selectedDevice.id ? { ...d, ...formFields } : d));
+        setGasDetectors(prev => prev.map(d => d.id === selectedDevice.id ? { 
+          ...d, 
+          ...formFields, 
+          associationType: assocType, 
+          project: finalProjectName 
+        } : d));
       }
     } else if (activeTab === 'alarm') {
       if (modalMode === 'create') {
@@ -560,14 +616,20 @@ export function DeviceManagement() {
           createdAt: formFields.createdAt || new Date().toISOString().replace('T', ' ').substring(0, 19),
           sn: formFields.sn || '',
           name: formFields.name || formFields.sn || '',
-          project: formFields.project || '东南造船厂',
+          associationType: assocType,
+          project: finalProjectName,
           location: formFields.location || '',
           floor: formFields.floor || '',
           decibel: formFields.decibel || '110dB'
         };
         setAlarms([newItem, ...alarms]);
       } else if (modalMode === 'edit' && selectedDevice) {
-        setAlarms(prev => prev.map(d => d.id === selectedDevice.id ? { ...d, ...formFields } : d));
+        setAlarms(prev => prev.map(d => d.id === selectedDevice.id ? { 
+          ...d, 
+          ...formFields, 
+          associationType: assocType, 
+          project: finalProjectName 
+        } : d));
       }
     } else if (activeTab === 'camera') {
       if (modalMode === 'create') {
@@ -578,17 +640,22 @@ export function DeviceManagement() {
           name: formFields.name || '',
           modelCategory: formFields.modelCategory || '--',
           apiUrl: formFields.apiUrl || '',
-          project: formFields.project || '东南造船厂',
+          associationType: assocType,
+          project: finalProjectName,
           createdAt: formFields.createdAt || new Date().toISOString().replace('T', ' ').substring(0, 19),
           isStreaming: formFields.isStreaming !== undefined ? formFields.isStreaming : true,
           rtspUrl: formFields.rtspUrl || ''
         };
         setCameras([newItem, ...cameras]);
       } else if (modalMode === 'edit' && selectedDevice) {
-        setCameras(prev => prev.map(d => d.id === selectedDevice.id ? { ...d, ...formFields } : d));
+        setCameras(prev => prev.map(d => d.id === selectedDevice.id ? { 
+          ...d, 
+          ...formFields, 
+          associationType: assocType, 
+          project: finalProjectName 
+        } : d));
       }
     }
-
     setModalMode(null);
     setSelectedDevice(null);
   };
@@ -845,7 +912,19 @@ export function DeviceManagement() {
                       <td className="py-2.5 px-2 text-center text-slate-500 font-mono text-[11px] border-r border-slate-50">{idx + 1}</td>
                       <td className="py-2.5 px-3 text-center font-mono text-slate-800 text-[11px] whitespace-nowrap border-r border-slate-50">{device.code}</td>
                       <td className="py-2.5 px-3 text-center text-slate-800 font-medium whitespace-nowrap border-r border-slate-50">{device.name}</td>
-                      <td className="py-2.5 px-3 text-center text-slate-700 whitespace-nowrap border-r border-slate-50">{device.project}</td>
+                      <td className="py-2.5 px-3 text-center whitespace-nowrap border-r border-slate-50">
+                        {(device.associationType === 'global' || device.project === '全厂通用设备') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            🏢 全厂通用设备
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                            🚢 {device.project}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-3 text-center whitespace-nowrap border-r border-slate-50">
                         {device.status === '在线' ? (
                           <span className="text-emerald-500 font-semibold text-[11px]">在线</span>
@@ -904,7 +983,19 @@ export function DeviceManagement() {
                       <td className="py-2.5 px-4 text-center font-mono text-slate-600 text-[11px] whitespace-nowrap border-r border-slate-50">{device.createdAt}</td>
                       <td className="py-2.5 px-4 text-center font-mono text-slate-800 text-[11px] whitespace-nowrap border-r border-slate-50">{device.sn}</td>
                       <td className="py-2.5 px-4 text-center font-mono text-slate-800 text-[11px] whitespace-nowrap border-r border-slate-50">{device.name}</td>
-                      <td className="py-2.5 px-4 text-center text-slate-700 whitespace-nowrap border-r border-slate-50">{device.project}</td>
+                      <td className="py-2.5 px-4 text-center whitespace-nowrap border-r border-slate-50">
+                        {(device.associationType === 'global' || device.project === '全厂通用设备') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            🏢 全厂通用设备
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                            🚢 {device.project}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-4 text-center text-slate-800 whitespace-nowrap border-r border-slate-50">{device.location}</td>
                       <td className="py-2.5 px-3 text-center font-mono text-slate-600 text-[11px] border-r border-slate-50">{device.floor || ''}</td>
                       <td className="py-2.5 px-4 text-center whitespace-nowrap">
@@ -953,7 +1044,19 @@ export function DeviceManagement() {
                       <td className="py-2.5 px-4 text-center font-mono text-slate-800 text-[11px] whitespace-nowrap border-r border-slate-50 max-w-[160px] truncate" title={device.name}>
                         {device.name}
                       </td>
-                      <td className="py-2.5 px-4 text-center text-slate-700 whitespace-nowrap border-r border-slate-50">{device.project}</td>
+                      <td className="py-2.5 px-4 text-center whitespace-nowrap border-r border-slate-50">
+                        {(device.associationType === 'global' || device.project === '全厂通用设备') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            🏢 全厂通用设备
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                            🚢 {device.project}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-4 text-center text-slate-800 whitespace-nowrap border-r border-slate-50">{device.location}</td>
                       <td className="py-2.5 px-3 text-center font-mono text-slate-600 text-[11px] border-r border-slate-50">{device.floor || ''}</td>
                       <td className="py-2.5 px-4 text-center whitespace-nowrap">
@@ -1001,7 +1104,19 @@ export function DeviceManagement() {
                       <td className="py-2.5 px-4 text-center text-slate-800 font-medium whitespace-nowrap border-r border-slate-50">{device.name}</td>
                       <td className="py-2.5 px-3 text-center text-slate-500 font-mono text-[11px] whitespace-nowrap border-r border-slate-50">{device.modelCategory}</td>
                       <td className="py-2.5 px-4 text-center font-mono text-sky-700 text-[11px] whitespace-nowrap border-r border-slate-50">{device.apiUrl}</td>
-                      <td className="py-2.5 px-4 text-center text-slate-700 whitespace-nowrap border-r border-slate-50">{device.project}</td>
+                      <td className="py-2.5 px-4 text-center whitespace-nowrap border-r border-slate-50">
+                        {(device.associationType === 'global' || device.project === '全厂通用设备') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            🏢 全厂通用设备
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                            🚢 {device.project}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-4 text-center font-mono text-slate-600 text-[11px] whitespace-nowrap border-r border-slate-50">{device.createdAt}</td>
                       <td className="py-2.5 px-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
@@ -1103,16 +1218,43 @@ export function DeviceManagement() {
                       className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">所属项目</label>
-                    <select
-                      value={formFields.project || '东南造船厂'}
-                      onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
-                    >
-                      {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                  <div className="col-span-2">
+                    <label className="block text-slate-600 font-medium mb-1">配置关联模式</label>
+                    <div className="flex items-center gap-6 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'global'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'global', project: '全厂通用设备' })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-purple-700">🏢 全厂通用设备</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'project'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'project', project: shipProjectOptions[0] })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-sky-700">🚢 关联造船项目</span>
+                      </label>
+                    </div>
                   </div>
+                  {formFields.associationType === 'project' && (
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">关联造船项目</label>
+                      <select
+                        value={formFields.project || shipProjectOptions[0]}
+                        onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
+                      >
+                        {shipProjectOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-slate-600 font-medium mb-1">基站状态</label>
                     <select
@@ -1224,16 +1366,43 @@ export function DeviceManagement() {
                       className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">所属项目</label>
-                    <select
-                      value={formFields.project || '东南造船厂'}
-                      onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
-                    >
-                      {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                  <div className="col-span-2">
+                    <label className="block text-slate-600 font-medium mb-1">配置关联模式</label>
+                    <div className="flex items-center gap-6 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'global'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'global', project: '全厂通用设备' })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-purple-700">🏢 全厂通用设备</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'project'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'project', project: shipProjectOptions[0] })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-sky-700">🚢 关联造船项目</span>
+                      </label>
+                    </div>
                   </div>
+                  {formFields.associationType === 'project' && (
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">关联造船项目</label>
+                      <select
+                        value={formFields.project || shipProjectOptions[0]}
+                        onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
+                      >
+                        {shipProjectOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-slate-600 font-medium mb-1">安装位置</label>
                     <input
@@ -1291,16 +1460,43 @@ export function DeviceManagement() {
                       className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">所属项目</label>
-                    <select
-                      value={formFields.project || '东南造船厂'}
-                      onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
-                    >
-                      {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                  <div className="col-span-2">
+                    <label className="block text-slate-600 font-medium mb-1">配置关联模式</label>
+                    <div className="flex items-center gap-6 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'global'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'global', project: '全厂通用设备' })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-purple-700">🏢 全厂通用设备</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'project'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'project', project: shipProjectOptions[0] })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-sky-700">🚢 关联造船项目</span>
+                      </label>
+                    </div>
                   </div>
+                  {formFields.associationType === 'project' && (
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">关联造船项目</label>
+                      <select
+                        value={formFields.project || shipProjectOptions[0]}
+                        onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
+                      >
+                        {shipProjectOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-slate-600 font-medium mb-1">安装位置</label>
                     <input
@@ -1379,16 +1575,43 @@ export function DeviceManagement() {
                       className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 font-mono text-xs"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">所属项目</label>
-                    <select
-                      value={formFields.project || '东南造船厂'}
-                      onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
-                    >
-                      {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                  <div className="col-span-2">
+                    <label className="block text-slate-600 font-medium mb-1">配置关联模式</label>
+                    <div className="flex items-center gap-6 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'global'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'global', project: '全厂通用设备' })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-purple-700">🏢 全厂通用设备</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="associationType"
+                          checked={formFields.associationType === 'project'}
+                          onChange={() => setFormFields({ ...formFields, associationType: 'project', project: shipProjectOptions[0] })}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-sky-700">🚢 关联造船项目</span>
+                      </label>
+                    </div>
                   </div>
+                  {formFields.associationType === 'project' && (
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">关联造船项目</label>
+                      <select
+                        value={formFields.project || shipProjectOptions[0]}
+                        onChange={(e) => setFormFields({ ...formFields, project: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500 text-xs"
+                      >
+                        {shipProjectOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-slate-600 font-medium mb-1">推流状态</label>
                     <select
