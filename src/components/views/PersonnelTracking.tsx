@@ -46,10 +46,17 @@ import {
   History,
   PanelRightClose,
   PanelRightOpen,
+  UserCheck,
   X
 } from 'lucide-react';
 import { MOCK_PROJECTS } from '@/src/data/mockProjects';
-import { MOCK_PERSONNEL_LIST, DetailedPersonnel, TrajectoryPoint } from '@/src/data/mockPersonnel';
+import { 
+  MOCK_PERSONNEL_LIST, 
+  DetailedPersonnel, 
+  TrajectoryPoint, 
+  WORKER_ROLE_OPTIONS, 
+  WORKER_TEAM_OPTIONS 
+} from '@/src/data/mockPersonnel';
 
 import lngShipImg from '@/src/assets/images/lng_ship_model_1787972569670.jpg';
 import containerShipImg from '@/src/assets/images/container_ship_model_1787972581740.jpg';
@@ -59,10 +66,10 @@ import bulkShipImg from '@/src/assets/images/bulk_ship_model_1787972609425.jpg';
 export function PersonnelTracking() {
   // 选中的人员
   const [selectedPersonId, setSelectedPersonId] = useState<string>('EMP-001');
-  // 左侧人员列表的项目筛选
-  const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
-  // 部门筛选
-  const [selectedDeptFilter, setSelectedDeptFilter] = useState<string>('all');
+  // 人员工种下拉筛选
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('all');
+  // 人员班组下拉筛选
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>('all');
   // 搜索关键词（姓名/工号/角色/定位卡号）
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   
@@ -138,7 +145,7 @@ export function PersonnelTracking() {
     return MOCK_PROJECTS.find(p => p.id === activeViewerProjectId) || MOCK_PROJECTS[0];
   }, [activeViewerProjectId]);
 
-  // 人员列表过滤（根据搜索关键字、项目、部门）
+  // 人员列表过滤（根据搜索关键字、工种下拉、班组下拉）
   const filteredPersonnel = useMemo(() => {
     return MOCK_PERSONNEL_LIST.filter(p => {
       const matchKeyword = 
@@ -147,14 +154,15 @@ export function PersonnelTracking() {
         p.id.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.role.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.locatorId.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        p.department.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.projectName.toLowerCase().includes(searchKeyword.toLowerCase());
       
-      const matchProject = selectedProjectFilter === 'all' || p.projectId === selectedProjectFilter;
-      const matchDept = selectedDeptFilter === 'all' || p.department.includes(selectedDeptFilter);
+      const matchRole = selectedRoleFilter === 'all' || p.role === selectedRoleFilter;
+      const matchTeam = selectedTeamFilter === 'all' || p.department === selectedTeamFilter;
 
-      return matchKeyword && matchProject && matchDept;
+      return matchKeyword && matchRole && matchTeam;
     });
-  }, [searchKeyword, selectedProjectFilter, selectedDeptFilter]);
+  }, [searchKeyword, selectedRoleFilter, selectedTeamFilter]);
 
   // 根据时间范围查询过滤当前人员的轨迹节点
   const filteredTrajectory = useMemo(() => {
@@ -1456,41 +1464,82 @@ export function PersonnelTracking() {
             )}
           </div>
 
-          {/* 归属项目关联项目列表信息筛选下拉框 */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1 text-[11px] text-slate-500 font-semibold">
-              <Ship className="w-3 h-3 text-blue-600" />
-              <span>按归属项目筛选:</span>
-            </div>
-            <select 
-              value={selectedProjectFilter}
-              onChange={(e) => setSelectedProjectFilter(e.target.value)}
-              className="w-full text-xs bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-slate-700 font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer"
-            >
-              <option value="all">全部关联项目 ({MOCK_PROJECTS.length} 个在建项目)</option>
-              {MOCK_PROJECTS.map(proj => (
-                <option key={proj.id} value={proj.id}>
-                  {proj.id} - {proj.name} ({proj.shipType})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 部门快速筛选 */}
-          <div className="flex items-center gap-1.5 mt-2 overflow-x-auto pb-0.5 no-scrollbar text-[10px]">
-            {['all', '搭载', '涂装', '安环', '轮机'].map(dept => (
-              <button
-                key={dept}
-                onClick={() => setSelectedDeptFilter(dept)}
-                className={`px-2 py-0.8 rounded-md font-medium whitespace-nowrap transition-colors border ${
-                  selectedDeptFilter === dept 
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs' 
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+          {/* 人员工种与人员班组下拉筛选条件 */}
+          <div className="space-y-2 pt-1 border-t border-slate-100">
+            {/* 1. 人员工种下拉筛选 */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <UserCheck className="w-3 h-3 text-blue-600" />
+                  <span>人员工种</span>
+                </span>
+                {selectedRoleFilter !== 'all' && (
+                  <span className="text-[10px] text-blue-600 font-normal">已筛选</span>
+                )}
+              </label>
+              <select 
+                value={selectedRoleFilter}
+                onChange={(e) => setSelectedRoleFilter(e.target.value)}
+                className={`w-full text-xs border rounded-lg py-1.5 px-2.5 outline-none transition-all cursor-pointer shadow-2xs ${
+                  selectedRoleFilter !== 'all' 
+                    ? 'bg-blue-50/50 border-blue-400 text-blue-800 font-semibold ring-2 ring-blue-500/10' 
+                    : 'bg-white border-slate-200 text-slate-700 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
                 }`}
               >
-                {dept === 'all' ? '全部工段' : `${dept}部`}
-              </button>
-            ))}
+                <option value="all">全部工种 ({WORKER_ROLE_OPTIONS.length} 类工种)</option>
+                {WORKER_ROLE_OPTIONS.map(role => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. 人员班组下拉筛选 */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Building2 className="w-3 h-3 text-blue-600" />
+                  <span>人员班组</span>
+                </span>
+                {selectedTeamFilter !== 'all' && (
+                  <span className="text-[10px] text-blue-600 font-normal">已筛选</span>
+                )}
+              </label>
+              <select 
+                value={selectedTeamFilter}
+                onChange={(e) => setSelectedTeamFilter(e.target.value)}
+                className={`w-full text-xs border rounded-lg py-1.5 px-2.5 outline-none transition-all cursor-pointer shadow-2xs ${
+                  selectedTeamFilter !== 'all' 
+                    ? 'bg-blue-50/50 border-blue-400 text-blue-800 font-semibold ring-2 ring-blue-500/10' 
+                    : 'bg-white border-slate-200 text-slate-700 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                }`}
+              >
+                <option value="all">全部班组 ({WORKER_TEAM_OPTIONS.length} 个班组/部门)</option>
+                {WORKER_TEAM_OPTIONS.map(team => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 快速重置过滤按钮 */}
+            {(selectedRoleFilter !== 'all' || selectedTeamFilter !== 'all' || searchKeyword.trim() !== '') && (
+              <div className="flex justify-end pt-1">
+                <button
+                  onClick={() => {
+                    setSelectedRoleFilter('all');
+                    setSelectedTeamFilter('all');
+                    setSearchKeyword('');
+                  }}
+                  className="text-[11px] text-blue-600 hover:text-blue-800 font-medium hover:underline flex items-center gap-1 py-0.5"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>重置所有筛选条件</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
         

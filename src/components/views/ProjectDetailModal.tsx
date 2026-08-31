@@ -243,7 +243,7 @@ export function ProjectDetailModal({
               <div className="text-xs text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
                 <span>工程负责人：<strong className="text-slate-700 font-semibold">{project.manager}</strong></span>
                 <span>•</span>
-                <span>当前船厂停泊位：<strong className="text-blue-700 font-medium">{project.dockingArea}</strong></span>
+                <span>建造船厂所在区域：<strong className="text-blue-700 font-semibold">{project.dockingArea}</strong></span>
                 <span>•</span>
                 <span>基准空间原点：<span className="font-mono text-amber-700 font-medium">{project.datum}</span></span>
                 <span>•</span>

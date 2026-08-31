@@ -155,6 +155,58 @@ export const SHIP_TYPE_OPTIONS: ShipTypeOption[] = [
   }
 ];
 
+// 建造船厂所在区域枚举常量（东南造船厂、冠海造船厂、马尾造船厂）
+export const SHIPYARD_AREA_OPTIONS = [
+  '东南造船厂',
+  '冠海造船厂',
+  '马尾造船厂'
+] as const;
+
+export type ShipyardArea = typeof SHIPYARD_AREA_OPTIONS[number];
+
+// 常用建造阶段枚举
+export const SHIPBUILDING_PHASE_OPTIONS = [
+  '分段搭载',
+  '合拢焊接',
+  '密闭涂装',
+  '水下舾装',
+  '系泊试验',
+  '交船交付'
+] as const;
+
+export type ShipbuildingPhase = typeof SHIPBUILDING_PHASE_OPTIONS[number];
+
+/**
+ * 提取并解析版本号各段数值（例如 "V2.1" -> [2, 1], "V1.0 (分段)" -> [1, 0]）
+ */
+export function parseVersionNumbers(verStr: string): number[] {
+  if (!verStr) return [1, 0];
+  const cleaned = verStr.replace(/^[vV]/, '').replace(/[\(（].*?[\)）]/g, '').trim();
+  const match = cleaned.match(/^(\d+(\.\d+)*)/);
+  if (!match) return [1, 0];
+  return match[1].split('.').map(n => parseInt(n, 10) || 0);
+}
+
+/**
+ * 比较两个版本号:
+ * > 0 : v1 > v2
+ * === 0 : v1 === v2
+ * < 0 : v1 < v2
+ */
+export function compareVersionNumbers(v1: string, v2: string): number {
+  const p1 = parseVersionNumbers(v1);
+  const p2 = parseVersionNumbers(v2);
+  const len = Math.max(p1.length, p2.length);
+  for (let i = 0; i < len; i++) {
+    const num1 = p1[i] ?? 0;
+    const num2 = p2[i] ?? 0;
+    if (num1 !== num2) {
+      return num1 - num2;
+    }
+  }
+  return 0;
+}
+
 export interface CreatedProjectData {
   id: string;
   name: string;
@@ -200,7 +252,11 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
   // 2. 项目基本信息
   const [projectName, setProjectName] = useState('');
   const [selectedShipId, setSelectedShipId] = useState<string>('M-001');
-  const [initialVersion, setInitialVersion] = useState('V1.0 (分段搭载阶段)');
+  // 建造阶段与版本号分开存储
+  const [phase, setPhase] = useState<string>('分段搭载');
+  const [version, setVersion] = useState<string>('V1.0');
+  const [historyVersion, setHistoryVersion] = useState<string>('V1.0');
+
   const [manager, setManager] = useState('张建国');
   const [status, setStatus] = useState<'planning' | 'in_progress' | 'completed' | 'suspended'>('planning');
   const [progress, setProgress] = useState<number>(0);
@@ -209,8 +265,8 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
   const [startDate, setStartDate] = useState('2026-09-01');
   const [endDate, setEndDate] = useState('2027-12-31');
 
-  // 4. 建造所在船厂区域
-  const [dockingArea, setDockingArea] = useState('1号造船台 (不可移泊)');
+  // 4. 建造船厂所在区域
+  const [dockingArea, setDockingArea] = useState<string>('东南造船厂');
 
   // 5. 项目描述（非必填）
   const [description, setDescription] = useState('');
@@ -236,8 +292,21 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
         setManager(initialData.manager || '张建国');
         setStartDate(initialData.startDate || '2026-09-01');
         setEndDate(initialData.endDate || '2027-12-31');
-        setDockingArea(initialData.dockingArea || '1号造船台 (不可移泊)');
-        setInitialVersion(initialData.version || 'V1.0');
+        
+        // 回填船厂区域，保证是三个合法枚举之一
+        const validArea = SHIPYARD_AREA_OPTIONS.includes(initialData.dockingArea as any)
+          ? initialData.dockingArea
+          : '东南造船厂';
+        setDockingArea(validArea);
+        
+        // 分离建造阶段与版本号
+        const rawVer = initialData.version || 'V1.0';
+        const cleanVer = rawVer.replace(/[\(（].*?[\)）]/g, '').trim() || 'V1.0';
+        const matchedPhase = initialData.phase || (rawVer.includes('(') ? rawVer.replace(/^[^\(（]*[\(（]/, '').replace(/[\)）].*$/, '').trim() : '分段搭载');
+        setPhase(matchedPhase || '分段搭载');
+        setVersion(cleanVer);
+        setHistoryVersion(cleanVer);
+
         setStatus(initialData.status || 'in_progress');
         setProgress(initialData.progress ?? 0);
         setDescription(initialData.description || '');
@@ -266,11 +335,14 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
         const generatedCode = `PRJ-${year}-${randNum}`;
         setProjectCode(generatedCode);
         setProjectName('');
-        setInitialVersion('V1.0 (分段搭载阶段)');
+        // 新建时版本号初始默认为 V1.0，不可修改
+        setPhase('分段搭载');
+        setVersion('V1.0');
+        setHistoryVersion('V1.0');
         setManager('张建国');
         setStartDate('2026-09-01');
         setEndDate('2027-12-31');
-        setDockingArea('1号造船台 (不可移泊)');
+        setDockingArea('东南造船厂');
         setDescription('');
         setStatus('planning');
         setProgress(0);
@@ -281,8 +353,9 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
     }
   }, [isOpen, initialData]);
 
-  // 当轮船类型改变时，自动将船型参数同步填入下方
+  // 当轮船类型改变时，自动将船型参数同步填入下方（仅在新建模式允许切换）
   const handleShipTypeChange = (shipId: string, isDefault = false) => {
+    if (isEditMode) return; // 编辑模式锁定
     setSelectedShipId(shipId);
     const ship = SHIP_TYPE_OPTIONS.find(s => s.id === shipId);
     if (ship) {
@@ -309,6 +382,26 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
       setErrorMsg('请输入项目名称');
       return;
     }
+    if (!phase.trim()) {
+      setErrorMsg('请输入或选择建造阶段');
+      return;
+    }
+    if (!version.trim()) {
+      setErrorMsg('请输入版本号');
+      return;
+    }
+
+    const trimmedVer = version.trim();
+    const formattedVer = trimmedVer.toUpperCase().startsWith('V') ? trimmedVer.toUpperCase() : `V${trimmedVer}`;
+
+    // 编辑模式下的版本号限制：不能改成比历史版本号小的数值
+    if (isEditMode && historyVersion) {
+      if (compareVersionNumbers(formattedVer, historyVersion) < 0) {
+        setErrorMsg(`版本号不可降低！当前修改的版本【${formattedVer}】低于历史版本【${historyVersion}】，请保持原版本或向上递增升级（如 ${historyVersion}、V1.1、V2.0 等）`);
+        return;
+      }
+    }
+
     if (!startDate || !endDate) {
       setErrorMsg('请选择项目周期的起止时间');
       return;
@@ -330,8 +423,8 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
       manager: manager,
       dockingArea: dockingArea,
       datum: initialData?.datum || 'Datum P0 (X:0, Z:0)',
-      phase: initialData?.phase || '分段搭载',
-      version: initialVersion,
+      phase: phase.trim(),
+      version: formattedVer,
       devices: initialData?.devices || '读卡(10) 激励(4) 四合一(6) 烟感(12)',
       fence: initialData?.fence || '船台施工安全立体围栏',
       personnel: initialData?.personnel ?? 0,
@@ -448,36 +541,131 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
                 />
               </div>
 
-              {/* 轮船类型（关联船模类型列表选择） */}
+              {/* 轮船类型（关联船模类型列表选择，编辑时不可修改） */}
               <div>
                 <label className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                  <span><span className="text-red-500 mr-1">*</span>轮船类型</span>
-                  <span className="text-[11px] font-normal text-slate-400">自动同步 3D 船模参数</span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-red-500">*</span>轮船类型
+                  </span>
+                  {isEditMode ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-normal text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      <Lock className="w-3 h-3 text-amber-600" /> 编辑时不可修改
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-normal text-slate-400">自动同步 3D 船模参数</span>
+                  )}
                 </label>
-                <select 
-                  value={selectedShipId} 
-                  onChange={(e) => handleShipTypeChange(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
-                >
-                  {SHIP_TYPE_OPTIONS.map((ship) => (
-                    <option key={ship.id} value={ship.id}>
-                      {ship.name} ({ship.category})
-                    </option>
-                  ))}
-                </select>
+                {isEditMode ? (
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      value={`${currentShip.name} (${currentShip.category})`}
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 cursor-not-allowed pr-9 shadow-2xs"
+                    />
+                    <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                ) : (
+                  <select 
+                    value={selectedShipId} 
+                    onChange={(e) => handleShipTypeChange(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                  >
+                    {SHIP_TYPE_OPTIONS.map((ship) => (
+                      <option key={ship.id} value={ship.id}>
+                        {ship.name} ({ship.category})
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {isEditMode && (
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    当前工程已关联 {currentShip.typeCode} 船体几何基准及分段数模，轮船类型已锁定。
+                  </p>
+                )}
               </div>
 
-              {/* 初始建造阶段与版本号 */}
+              {/* 建造阶段 */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  <span className="text-red-500 mr-1">*</span>建造阶段与版本号
+                <label className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span className="flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-red-500">*</span>建造阶段
+                  </span>
+                  <span className="text-[11px] font-normal text-slate-400">工序工艺节点</span>
                 </label>
-                <input 
-                  type="text" 
-                  value={initialVersion}
-                  onChange={(e) => setInitialVersion(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" 
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={SHIPBUILDING_PHASE_OPTIONS.includes(phase as any) ? phase : 'custom'}
+                    onChange={(e) => {
+                      if (e.target.value !== 'custom') {
+                        setPhase(e.target.value);
+                      }
+                    }}
+                    className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                  >
+                    {SHIPBUILDING_PHASE_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                    {!SHIPBUILDING_PHASE_OPTIONS.includes(phase as any) && (
+                      <option value="custom">自定义阶段</option>
+                    )}
+                  </select>
+                  <input 
+                    type="text" 
+                    value={phase}
+                    onChange={(e) => setPhase(e.target.value)}
+                    placeholder="输入阶段名称" 
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" 
+                  />
+                </div>
+              </div>
+
+              {/* 项目版本号 */}
+              <div>
+                <label className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <span className="flex items-center gap-1">
+                    <span className="text-red-500">*</span>版本号
+                  </span>
+                  {!isEditMode ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      <Lock className="w-3 h-3 text-slate-400" /> 初始默认V1.0（不支持修改）
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-normal text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                      历史版本: <strong className="font-mono">{historyVersion}</strong>
+                    </span>
+                  )}
+                </label>
+                {!isEditMode ? (
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value="V1.0"
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-600 cursor-not-allowed" 
+                    />
+                    <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                ) : (
+                  <div>
+                    <input 
+                      type="text" 
+                      value={version}
+                      onChange={(e) => {
+                        setVersion(e.target.value);
+                        if (errorMsg) setErrorMsg('');
+                      }}
+                      placeholder="如 V1.0, V1.1, V2.0" 
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" 
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      可输入新版本号，数值不能小于历史版本 <span className="font-mono font-bold text-slate-600">{historyVersion}</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* 建造负责人 */}
@@ -494,24 +682,21 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit, initialData }: C
                 />
               </div>
 
-              {/* 建造所在船厂区域 */}
+              {/* 建造船厂所在区域 */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  <span className="text-red-500 mr-1">*</span>建造所在船厂区域
+                  <span className="text-red-500 mr-1">*</span>建造船厂所在区域
                 </label>
                 <select 
                   value={dockingArea}
                   onChange={(e) => setDockingArea(e.target.value)}
                   className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
                 >
-                  <option value="1号造船台 (不可移泊)">1号造船台 (室内重型造船区 - Datum P0)</option>
-                  <option value="2号造船台 (不可移泊)">2号造船台 (总组搭载区 - Datum P1)</option>
-                  <option value="1号大型干船坞 (干坞搭载)">1号大型干船坞 (干坞搭载区 - Datum P2)</option>
-                  <option value="2号修造船坞 (合拢坞)">2号修造船坞 (船体合拢坞 - Datum P3)</option>
-                  <option value="1号码头 (东区舾装码头)">1号码头 (东区舾装调试码头)</option>
-                  <option value="2号码头 (西区系泊码头)">2号码头 (西区系泊试验码头)</option>
-                  <option value="3号码头 (水下舾装码头)">3号码头 (水下舾装码头)</option>
-                  <option value="总装分段重型拼装车间">总装分段重型拼装车间</option>
+                  {SHIPYARD_AREA_OPTIONS.map((yard) => (
+                    <option key={yard} value={yard}>
+                      {yard}
+                    </option>
+                  ))}
                 </select>
               </div>
 

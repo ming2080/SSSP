@@ -66,19 +66,48 @@ export interface DetailedPersonnel {
   trajectory: TrajectoryPoint[];
 }
 
+export const WORKER_ROLE_OPTIONS = [
+  '安全部长',
+  '油漆工',
+  '调度',
+  '安全主管',
+  '安全员',
+  '装配工',
+  '电工',
+  '钢筋工',
+  '电焊工',
+  '装修工'
+] as const;
+
+export type WorkerRole = typeof WORKER_ROLE_OPTIONS[number];
+
+export const WORKER_TEAM_OPTIONS = [
+  '搭载部',
+  '涂装部',
+  '机电部',
+  '船装部',
+  '安全环保部',
+  '船体电焊班组',
+  '船体打磨班组',
+  '船体装配班组',
+  '喷涂班组'
+] as const;
+
+export type WorkerTeam = typeof WORKER_TEAM_OPTIONS[number];
+
 export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
   {
     id: 'EMP-001',
     name: '王建国',
     gender: 'male',
-    role: '特种电焊工',
-    department: '搭载一部 (合拢班)',
+    role: '电焊工',
+    department: '船体电焊班组',
     status: 'active',
     locatorId: 'TAG-LOC-1001',
     projectId: 'PRJ-2026-LNG01',
     projectName: '17.4万m³ 薄膜型大型LNG船 1号舰',
     shipType: '清洁能源运输',
-    dockingArea: '1号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     helmetColor: 'yellow',
     avatarBg: 'bg-amber-500',
     avatarText: '王',
@@ -91,7 +120,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 32,
       y: 42,
-      areaName: '1号造船台',
+      areaName: '东南造船厂 1号船台',
       subArea: '艏部分段搭载区 (Datum P0)'
     },
     vesselPos: {
@@ -200,14 +229,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-002',
     name: '李海波',
     gender: 'male',
-    role: '专职安全巡检员',
-    department: '安环质检部',
+    role: '安全主管',
+    department: '安全环保部',
     status: 'active',
     locatorId: 'TAG-LOC-1002',
     projectId: 'PRJ-2026-LNG01',
     projectName: '17.4万m³ 薄膜型大型LNG船 1号舰',
     shipType: '清洁能源运输',
-    dockingArea: '1号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     helmetColor: 'red',
     avatarBg: 'bg-rose-500',
     avatarText: '李',
@@ -220,7 +249,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 35,
       y: 40,
-      areaName: '1号造船台',
+      areaName: '东南造船厂 1号船台',
       subArea: '1号船台防爆高空警戒区'
     },
     vesselPos: {
@@ -279,7 +308,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '1h 30m', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 35, y: 40, areaName: '1号造船台' },
+        shipyardPos: { x: 35, y: 40, areaName: '东南造船厂 1号船台' },
         vesselPos: { x: 45, y: 42, deck: '1号货舱底层', compartment: '气体采样监测仪巡检位', projectId: 'PRJ-2026-LNG01' },
         x: 45, 
         y: 42 
@@ -292,7 +321,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '45分', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 35, y: 40, areaName: '1号造船台' },
+        shipyardPos: { x: 35, y: 40, areaName: '东南造船厂 1号船台' },
         vesselPos: { x: 58, y: 35, deck: '甲板2层 (Upper Deck)', compartment: 'SEC-B204 高空监护网', projectId: 'PRJ-2026-LNG01' },
         x: 58, 
         y: 35 
@@ -305,7 +334,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '50分', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 35, y: 40, areaName: '1号造船台' },
+        shipyardPos: { x: 35, y: 40, areaName: '东南造船厂 1号船台' },
         vesselPos: { x: 72, y: 32, deck: '驾驶甲板', compartment: '驾驶台安防巡检位', projectId: 'PRJ-2026-LNG01' },
         x: 72, 
         y: 32 
@@ -316,14 +345,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-003',
     name: '张明',
     gender: 'male',
-    role: '重型起重指挥官',
-    department: '搭载二部 (起重工段)',
+    role: '调度',
+    department: '搭载部',
     status: 'active',
     locatorId: 'TAG-LOC-1003',
     projectId: 'PRJ-2026-BOX12',
     projectName: '24,000 TEU 超大型集装箱船',
     shipType: '集装箱班轮',
-    dockingArea: '1号码头 (东区舾装码头)',
+    dockingArea: '马尾造船厂',
     helmetColor: 'blue',
     avatarBg: 'bg-blue-600',
     avatarText: '张',
@@ -336,7 +365,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 72,
       y: 30,
-      areaName: '1号码头 (东区舾装码头)',
+      areaName: '马尾造船厂 1号码头',
       subArea: '1000吨重型龙门吊下操作区'
     },
     vesselPos: {
@@ -395,7 +424,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '1h 20m', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 72, y: 30, areaName: '1号码头' },
+        shipyardPos: { x: 72, y: 30, areaName: '马尾造船厂 1号码头' },
         vesselPos: { x: 25, y: 50, deck: '甲板艏楼区 (Forecastle)', compartment: 'SEC-C101 绞缆机基座', projectId: 'PRJ-2026-BOX12' },
         x: 25, 
         y: 50 
@@ -406,14 +435,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-004',
     name: '陈志强',
     gender: 'male',
-    role: '高压无气喷涂工',
-    department: '涂装工程部',
+    role: '油漆工',
+    department: '喷涂班组',
     status: 'active',
     locatorId: 'TAG-LOC-1004',
     projectId: 'PRJ-2026-TANK02',
     projectName: '30万吨 VLCC 超大型原油船',
     shipType: '液体散货',
-    dockingArea: '3号码头 (水下舾装码头)',
+    dockingArea: '冠海造船厂',
     helmetColor: 'orange',
     avatarBg: 'bg-orange-500',
     avatarText: '陈',
@@ -426,7 +455,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 82,
       y: 65,
-      areaName: '3号码头 (水下舾装码头)',
+      areaName: '冠海造船厂 3号码头',
       subArea: 'VLCC 压载舱密闭涂装区'
     },
     vesselPos: {
@@ -485,7 +514,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '1h 30m', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 82, y: 65, areaName: '3号码头' },
+        shipyardPos: { x: 82, y: 65, areaName: '冠海造船厂 3号码头' },
         vesselPos: { x: 65, y: 60, deck: '货舱双层底 (Double Bottom)', compartment: 'SEC-D04 (4号压载边舱)', projectId: 'PRJ-2026-TANK02' },
         x: 65, 
         y: 60 
@@ -496,14 +525,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-005',
     name: '周晓琳',
     gender: 'female',
-    role: '轮机电气质检员',
-    department: '安环质检部 (电气组)',
+    role: '电工',
+    department: '机电部',
     status: 'active',
     locatorId: 'TAG-LOC-1005',
     projectId: 'PRJ-2026-LNG01',
     projectName: '17.4万m³ 薄膜型大型LNG船 1号舰',
     shipType: '清洁能源运输',
-    dockingArea: '1号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     helmetColor: 'white',
     avatarBg: 'bg-emerald-600',
     avatarText: '周',
@@ -516,7 +545,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 30,
       y: 45,
-      areaName: '1号造船台',
+      areaName: '东南造船厂 1号船台',
       subArea: '机舱分段总组区'
     },
     vesselPos: {
@@ -575,7 +604,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '2h 10m', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 30, y: 45, areaName: '1号造船台' },
+        shipyardPos: { x: 30, y: 45, areaName: '东南造船厂 1号船台' },
         vesselPos: { x: 75, y: 45, deck: '机舱平台层 (Engine Platform)', compartment: 'SEC-E01 (辅机发电机舱)', projectId: 'PRJ-2026-LNG01' },
         x: 75, 
         y: 45 
@@ -586,14 +615,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-006',
     name: '赵国庆',
     gender: 'male',
-    role: '船体结构装配组长',
-    department: '搭载一部 (结构班)',
+    role: '装配工',
+    department: '船体装配班组',
     status: 'active',
     locatorId: 'TAG-LOC-1006',
     projectId: 'PRJ-2026-BULK04',
     projectName: '82,000 DWT 卡姆萨尔型散货船',
     shipType: '干散货运输',
-    dockingArea: '2号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     helmetColor: 'yellow',
     avatarBg: 'bg-amber-600',
     avatarText: '赵',
@@ -606,7 +635,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 48,
       y: 52,
-      areaName: '2号造船台',
+      areaName: '东南造船厂 2号船台',
       subArea: '2号造船台中部分段合拢区'
     },
     vesselPos: {
@@ -665,7 +694,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '1h 40m', 
         status: 'normal', 
         domain: 'vessel',
-        shipyardPos: { x: 48, y: 52, areaName: '2号造船台' },
+        shipyardPos: { x: 48, y: 52, areaName: '东南造船厂 2号船台' },
         vesselPos: { x: 50, y: 50, deck: '主甲板 (Upper Deck)', compartment: 'SEC-M301 (3号货舱横舱壁)', projectId: 'PRJ-2026-BULK04' },
         x: 50, 
         y: 50 
@@ -676,14 +705,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-007',
     name: '孙浩',
     gender: 'male',
-    role: '管系安装技术员',
-    department: '轮机工程部 (管系班)',
+    role: '安全员',
+    department: '安全环保部',
     status: 'warning',
     locatorId: 'TAG-LOC-1007',
     projectId: 'PRJ-2026-LNG01',
     projectName: '17.4万m³ 薄膜型大型LNG船 1号舰',
     shipType: '清洁能源运输',
-    dockingArea: '1号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     helmetColor: 'yellow',
     avatarBg: 'bg-yellow-500',
     avatarText: '孙',
@@ -696,7 +725,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 33,
       y: 43,
-      areaName: '1号造船台',
+      areaName: '东南造船厂 1号船台',
       subArea: 'LNG深冷绝热管路敷设位'
     },
     vesselPos: {
@@ -755,7 +784,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         duration: '2h 15m', 
         status: 'alert', 
         domain: 'vessel',
-        shipyardPos: { x: 33, y: 43, areaName: '1号造船台' },
+        shipyardPos: { x: 33, y: 43, areaName: '东南造船厂 1号船台' },
         vesselPos: { x: 48, y: 46, deck: '低温管廊平台 (Cryo Trunk)', compartment: 'SEC-T02 (气相总管段)', projectId: 'PRJ-2026-LNG01' },
         x: 48, 
         y: 46 
@@ -766,14 +795,14 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     id: 'EMP-008',
     name: '刘勇',
     gender: 'male',
-    role: '动力定位系统调试专家',
-    department: '海工事业部 (调试组)',
+    role: '安全部长',
+    department: '安全环保部',
     status: 'inactive',
     locatorId: 'TAG-LOC-1008',
     projectId: 'PRJ-2026-PSV01',
     projectName: '75M 动力定位平台供应船 (DP-2)',
     shipType: '海洋工程',
-    dockingArea: '2号码头 (西区系泊码头)',
+    dockingArea: '马尾造船厂',
     helmetColor: 'white',
     avatarBg: 'bg-slate-400',
     avatarText: '刘',
@@ -786,7 +815,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
     shipyardPos: {
       x: 60,
       y: 25,
-      areaName: '2号码头 (西区系泊码头)',
+      areaName: '马尾造船厂 2号码头',
       subArea: '已离场/设备入库'
     },
     vesselPos: {
@@ -820,7 +849,7 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         domain: 'transition',
         isCrossDomain: true,
         crossDescription: '跨入 PRJ-2026-PSV01 平台供应船驾驶台完成交验',
-        shipyardPos: { x: 60, y: 25, areaName: '2号码头' },
+        shipyardPos: { x: 60, y: 25, areaName: '马尾造船厂 2号码头' },
         vesselPos: { x: 30, y: 50, deck: '驾驶台 (Bridge)', compartment: 'SEC-NAV01', projectId: 'PRJ-2026-PSV01' },
         x: 60, 
         y: 25 
@@ -836,6 +865,270 @@ export const MOCK_PERSONNEL_LIST: DetailedPersonnel[] = [
         shipyardPos: { x: 10, y: 85, areaName: '定位设备库房' },
         x: 10, 
         y: 85 
+      }
+    ]
+  },
+  {
+    id: 'EMP-009',
+    name: '黄德胜',
+    gender: 'male',
+    role: '钢筋工',
+    department: '船装部',
+    status: 'active',
+    locatorId: 'TAG-LOC-1009',
+    projectId: 'PRJ-2026-LNG01',
+    projectName: '17.4万m³ 薄膜型大型LNG船 1号舰',
+    shipType: '清洁能源运输',
+    dockingArea: '东南造船厂',
+    helmetColor: 'yellow',
+    avatarBg: 'bg-amber-700',
+    avatarText: '黄',
+    phone: '137****8890',
+    heartRate: 85,
+    battery: 89,
+    sosState: false,
+    workDuration: '3小时15分',
+    entryTime: '08:10:00',
+    shipyardPos: {
+      x: 36,
+      y: 44,
+      areaName: '东南造船厂 1号船台',
+      subArea: '船体加强结构支撑区'
+    },
+    vesselPos: {
+      deck: '主甲板 (Main Deck)',
+      section: 'SEC-A104 (支撑梁架)',
+      compartment: '液货舱底加强筋网格区',
+      x: 46,
+      y: 52,
+      z: 12.0
+    },
+    trajectory: [
+      {
+        time: '08:10:00',
+        timestamp: '2026-08-29 08:10:00',
+        location: '1号船台主通道门禁',
+        zone: '厂区门禁区',
+        duration: '5分',
+        status: 'entrance',
+        domain: 'shipyard',
+        shipyardPos: { x: 18, y: 76, areaName: '1号船台主通道' },
+        x: 18,
+        y: 76
+      },
+      {
+        time: '08:45:00',
+        timestamp: '2026-08-29 08:45:00',
+        location: '钢结构预制加工车间',
+        zone: '厂区加工区',
+        duration: '40分',
+        status: 'normal',
+        domain: 'shipyard',
+        shipyardPos: { x: 26, y: 62, areaName: '钢结构车间' },
+        x: 26,
+        y: 62
+      },
+      {
+        time: '09:30:00',
+        timestamp: '2026-08-29 09:30:00',
+        location: 'PRJ-2026-LNG01 货舱加强筋绑扎区',
+        zone: '船舶模型·搭载区',
+        duration: '2小时',
+        status: 'normal',
+        domain: 'vessel',
+        shipyardPos: { x: 36, y: 44, areaName: '东南造船厂 1号船台' },
+        vesselPos: { x: 46, y: 52, deck: '主甲板 (Main Deck)', compartment: 'SEC-A104', projectId: 'PRJ-2026-LNG01' },
+        x: 46,
+        y: 52
+      }
+    ]
+  },
+  {
+    id: 'EMP-010',
+    name: '钱学林',
+    gender: 'male',
+    role: '装修工',
+    department: '船装部',
+    status: 'active',
+    locatorId: 'TAG-LOC-1010',
+    projectId: 'PRJ-2026-BOX12',
+    projectName: '24,000 TEU 超大型集装箱船',
+    shipType: '集装箱班轮',
+    dockingArea: '马尾造船厂',
+    helmetColor: 'blue',
+    avatarBg: 'bg-teal-600',
+    avatarText: '钱',
+    phone: '136****2234',
+    heartRate: 76,
+    battery: 91,
+    sosState: false,
+    workDuration: '2小时50分',
+    entryTime: '08:35:00',
+    shipyardPos: {
+      x: 70,
+      y: 32,
+      areaName: '马尾造船厂 1号码头',
+      subArea: '上层建筑生活区舾装'
+    },
+    vesselPos: {
+      deck: '生活区3层 (Accommodation Deck 3)',
+      section: 'SEC-L302 (高级船员居住舱)',
+      compartment: '生活区绝热防火内装工程区',
+      x: 60,
+      y: 42,
+      z: 24.0
+    },
+    trajectory: [
+      {
+        time: '08:35:00',
+        timestamp: '2026-08-29 08:35:00',
+        location: '1号码头生活区专用舷梯口',
+        zone: '厂区门禁区',
+        duration: '5分',
+        status: 'entrance',
+        domain: 'shipyard',
+        shipyardPos: { x: 68, y: 46, areaName: '生活区舷梯口' },
+        x: 68,
+        y: 46
+      },
+      {
+        time: '09:15:00',
+        timestamp: '2026-08-29 09:15:00',
+        location: 'PRJ-2026-BOX12 上层建筑生活区居室装潢施工位',
+        zone: '船舶模型·生活区内装',
+        duration: '2小时10分',
+        status: 'normal',
+        domain: 'vessel',
+        shipyardPos: { x: 70, y: 32, areaName: '马尾造船厂 1号码头' },
+        vesselPos: { x: 60, y: 42, deck: '生活区3层 (Accommodation Deck 3)', compartment: 'SEC-L302', projectId: 'PRJ-2026-BOX12' },
+        x: 60,
+        y: 42
+      }
+    ]
+  },
+  {
+    id: 'EMP-011',
+    name: '吴建业',
+    gender: 'male',
+    role: '装配工',
+    department: '船体打磨班组',
+    status: 'active',
+    locatorId: 'TAG-LOC-1011',
+    projectId: 'PRJ-2026-BULK04',
+    projectName: '82,000 DWT 卡姆萨尔型散货船',
+    shipType: '干散货运输',
+    dockingArea: '东南造船厂',
+    helmetColor: 'yellow',
+    avatarBg: 'bg-indigo-600',
+    avatarText: '吴',
+    phone: '139****5511',
+    heartRate: 79,
+    battery: 87,
+    sosState: false,
+    workDuration: '3小时40分',
+    entryTime: '07:55:00',
+    shipyardPos: {
+      x: 46,
+      y: 50,
+      areaName: '东南造船厂 2号船台',
+      subArea: '散货船横隔板打磨修边工位'
+    },
+    vesselPos: {
+      deck: '主甲板 (Upper Deck)',
+      section: 'SEC-M202 (2号货舱打磨点)',
+      compartment: '横隔壁焊道打磨抛光区',
+      x: 48,
+      y: 48,
+      z: 15.0
+    },
+    trajectory: [
+      {
+        time: '07:55:00',
+        timestamp: '2026-08-29 07:55:00',
+        location: '2号船台打磨作业安全检录口',
+        zone: '厂区门禁区',
+        duration: '5分',
+        status: 'entrance',
+        domain: 'shipyard',
+        shipyardPos: { x: 38, y: 78, areaName: '2号船台检录口' },
+        x: 38,
+        y: 78
+      },
+      {
+        time: '08:30:00',
+        timestamp: '2026-08-29 08:30:00',
+        location: 'PRJ-2026-BULK04 2号货舱焊道抛光位',
+        zone: '船舶模型·打磨区',
+        duration: '2小时30分',
+        status: 'normal',
+        domain: 'vessel',
+        shipyardPos: { x: 46, y: 50, areaName: '东南造船厂 2号船台' },
+        vesselPos: { x: 48, y: 48, deck: '主甲板 (Upper Deck)', compartment: 'SEC-M202', projectId: 'PRJ-2026-BULK04' },
+        x: 48,
+        y: 48
+      }
+    ]
+  },
+  {
+    id: 'EMP-012',
+    name: '郑立伟',
+    gender: 'male',
+    role: '油漆工',
+    department: '涂装部',
+    status: 'active',
+    locatorId: 'TAG-LOC-1012',
+    projectId: 'PRJ-2026-TANK02',
+    projectName: '30万吨 VLCC 超大型原油船',
+    shipType: '液体散货',
+    dockingArea: '冠海造船厂',
+    helmetColor: 'orange',
+    avatarBg: 'bg-amber-600',
+    avatarText: '郑',
+    phone: '135****6618',
+    heartRate: 83,
+    battery: 93,
+    sosState: false,
+    workDuration: '3小时05分',
+    entryTime: '08:25:00',
+    shipyardPos: {
+      x: 80,
+      y: 62,
+      areaName: '冠海造船厂 3号码头',
+      subArea: 'VLCC 艏部外板防污涂装区'
+    },
+    vesselPos: {
+      deck: '外板水下区 (Outer Hull Waterline)',
+      section: 'SEC-B01 (球鼻艏外板)',
+      compartment: '硅树脂防污漆喷涂工位',
+      x: 20,
+      y: 60,
+      z: 6.0
+    },
+    trajectory: [
+      {
+        time: '08:25:00',
+        timestamp: '2026-08-29 08:25:00',
+        location: '3号码头涂装安检站',
+        zone: '厂区门禁区',
+        duration: '5分',
+        status: 'entrance',
+        domain: 'shipyard',
+        shipyardPos: { x: 74, y: 72, areaName: '3号码头涂装安检' },
+        x: 74,
+        y: 72
+      },
+      {
+        time: '09:00:00',
+        timestamp: '2026-08-29 09:00:00',
+        location: 'PRJ-2026-TANK02 球鼻艏外板高空吊篮喷涂位',
+        zone: '船舶模型·外板涂装',
+        duration: '2小时15分',
+        status: 'normal',
+        domain: 'vessel',
+        shipyardPos: { x: 80, y: 62, areaName: '冠海造船厂 3号码头' },
+        vesselPos: { x: 20, y: 60, deck: '外板水下区 (Outer Hull Waterline)', compartment: 'SEC-B01', projectId: 'PRJ-2026-TANK02' },
+        x: 20,
+        y: 60
       }
     ]
   }

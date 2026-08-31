@@ -27,7 +27,7 @@ import {
   Layers,
   Box
 } from 'lucide-react';
-import { CreateProjectModal, CreatedProjectData, SHIP_TYPE_OPTIONS } from './CreateProjectModal';
+import { CreateProjectModal, CreatedProjectData, SHIP_TYPE_OPTIONS, SHIPYARD_AREA_OPTIONS } from './CreateProjectModal';
 import { ProjectVersionsModal } from './ProjectVersionsModal';
 import { ProjectDetailModal } from './ProjectDetailModal';
 
@@ -67,7 +67,7 @@ const initialMockProjects: CreatedProjectData[] = [
     manager: '王建国',
     shipCode: 'HULL-LNG-174',
     datum: 'Datum P0 (X:-120, Z:60)',
-    dockingArea: '1号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     phase: '合拢焊接',
     version: 'V2.1 (合拢合口焊接)',
     devices: '读卡(12) 激励(6) 四合一(8) 烟感(16)',
@@ -95,7 +95,7 @@ const initialMockProjects: CreatedProjectData[] = [
     manager: '李海波',
     shipCode: 'HULL-BOX-240',
     datum: 'Datum P2 (X:-220, Z:-110)',
-    dockingArea: '1号码头 (东区舾装码头)',
+    dockingArea: '马尾造船厂',
     phase: '系泊试验',
     version: 'V3.0 (系泊电气调试)',
     devices: '读卡(18) 激励(8) 四合一(10) 烟感(24)',
@@ -123,7 +123,7 @@ const initialMockProjects: CreatedProjectData[] = [
     manager: '张明',
     shipCode: 'HULL-VLCC-300',
     datum: 'Datum P4 (X:240, Z:-80)',
-    dockingArea: '3号码头 (水下舾装码头)',
+    dockingArea: '冠海造船厂',
     phase: '水下舾装',
     version: 'V4.0 (试航前管系试压)',
     devices: '读卡(14) 激励(6) 四合一(6) 烟感(18)',
@@ -151,7 +151,7 @@ const initialMockProjects: CreatedProjectData[] = [
     manager: '陈远',
     shipCode: 'HULL-BULK-082',
     datum: 'Datum P1 (X:-30, Z:60)',
-    dockingArea: '2号造船台 (不可移泊)',
+    dockingArea: '东南造船厂',
     phase: '船台搭载',
     version: 'V1.3 (分段总组搭载)',
     devices: '读卡(8) 激励(4) 四合一(4) 烟感(8)',
@@ -179,7 +179,7 @@ const initialMockProjects: CreatedProjectData[] = [
     manager: '林峰',
     shipCode: 'HULL-PSV-075',
     datum: 'Datum P3 (X:10, Z:-40)',
-    dockingArea: '2号码头 (西区系泊码头)',
+    dockingArea: '冠海造船厂',
     phase: '交船交付',
     version: 'V5.0 (竣工交付归档)',
     devices: '读卡(6) 激励(4) 四合一(4) 烟感(8)',
@@ -259,7 +259,7 @@ export function ProjectManagement() {
       }
       // 5. 船厂区域过滤
       if (searchDockingArea !== 'ALL') {
-        if (!item.dockingArea.includes(searchDockingArea)) {
+        if (item.dockingArea !== searchDockingArea) {
           return false;
         }
       }
@@ -301,6 +301,40 @@ export function ProjectManagement() {
   const getCleanVersion = (versionStr?: string) => {
     if (!versionStr) return '';
     return versionStr.replace(/[\(（].*?[\)）]/g, '').trim();
+  };
+
+  // 船厂区域徽章渲染
+  const renderShipyardBadge = (yardName: string) => {
+    if (yardName.includes('东南造船厂')) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-md font-semibold whitespace-nowrap shadow-2xs">
+          <MapPin className="w-3 h-3 text-amber-600 shrink-0" />
+          东南造船厂
+        </span>
+      );
+    }
+    if (yardName.includes('冠海造船厂')) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] text-cyan-800 bg-cyan-50 border border-cyan-200/80 px-2.5 py-1 rounded-md font-semibold whitespace-nowrap shadow-2xs">
+          <MapPin className="w-3 h-3 text-cyan-600 shrink-0" />
+          冠海造船厂
+        </span>
+      );
+    }
+    if (yardName.includes('马尾造船厂')) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-md font-semibold whitespace-nowrap shadow-2xs">
+          <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+          马尾造船厂
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md font-medium whitespace-nowrap">
+        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+        {yardName}
+      </span>
+    );
   };
 
   // 状态显示渲染
@@ -364,7 +398,7 @@ export function ProjectManagement() {
 
       {/* 顶部筛选与搜索区域（标准企业级中后台查询面板） */}
       <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm shrink-0 space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* 1. 项目名称 */}
           <div>
             <label className="block text-[11px] font-bold text-slate-600 mb-1">项目名称</label>
@@ -429,7 +463,24 @@ export function ProjectManagement() {
             </select>
           </div>
 
-          {/* 4. 项目状态 */}
+          {/* 4. 建造船厂所在区域 */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">建造船厂区域</label>
+            <select 
+              value={searchDockingArea}
+              onChange={(e) => setSearchDockingArea(e.target.value)}
+              className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer font-medium"
+            >
+              <option value="ALL">全部船厂区域</option>
+              {SHIPYARD_AREA_OPTIONS.map((yard) => (
+                <option key={yard} value={yard}>
+                  {yard}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 5. 建造状态 */}
           <div>
             <label className="block text-[11px] font-bold text-slate-600 mb-1">建造状态</label>
             <select 
@@ -445,17 +496,17 @@ export function ProjectManagement() {
             </select>
           </div>
 
-          {/* 5. 查询与重置操作按钮 */}
+          {/* 6. 查询与重置操作按钮 */}
           <div className="flex items-end gap-2">
             <button 
               onClick={() => {}} // 响应式过滤已实时绑定
-              className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/20 transition-all"
+              className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
             >
               <Search className="w-3.5 h-3.5" /> 查询
             </button>
             <button 
               onClick={handleResetSearch}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors border border-slate-200"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors border border-slate-200 cursor-pointer"
               title="清空并重置筛选条件"
             >
               <RotateCcw className="w-3.5 h-3.5 text-slate-500" /> 重置
@@ -471,7 +522,7 @@ export function ProjectManagement() {
           <span className="text-[11px] text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full font-medium">
             共查询到 <strong className="text-blue-600 font-bold">{filteredProjects.length}</strong> / {projects.length} 个项目
           </span>
-          {(searchName || searchCode || searchShipType !== 'ALL' || searchStatus !== 'ALL') && (
+          {(searchName || searchCode || searchShipType !== 'ALL' || searchStatus !== 'ALL' || searchDockingArea !== 'ALL') && (
             <span className="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full flex items-center gap-1">
               <Filter className="w-2.5 h-2.5" /> 过滤生效中
             </span>
@@ -568,11 +619,9 @@ export function ProjectManagement() {
                     </span>
                   </td>
 
-                  {/* 4. 建造所在船厂区域（仅显示厂区名） */}
+                  {/* 4. 建造船厂所在区域 */}
                   <td className="px-4 py-3.5 whitespace-nowrap align-middle">
-                    <span className="inline-block text-[11px] text-amber-800 bg-amber-50 border border-amber-200/70 px-2.5 py-1 rounded-md font-medium whitespace-nowrap">
-                      {project.dockingArea}
-                    </span>
+                    {renderShipyardBadge(project.dockingArea)}
                   </td>
 
                   {/* 5. 建造周期起止时间 */}
@@ -736,12 +785,10 @@ export function ProjectManagement() {
                   </div>
                   <div className="flex items-center justify-between text-slate-600">
                     <div className="flex items-center text-slate-500">
-                      <MapPin className="w-3 h-3 mr-1 text-amber-500" />
-                      <span>区域:</span>
+                      <MapPin className="w-3 h-3 mr-1 text-blue-500" />
+                      <span>船厂区域:</span>
                     </div>
-                    <span className="text-amber-800 font-medium text-[10px] bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/50 line-clamp-1 max-w-[130px]" title={project.dockingArea}>
-                      {project.dockingArea}
-                    </span>
+                    {renderShipyardBadge(project.dockingArea)}
                   </div>
                   <div className="flex items-center justify-between text-slate-600">
                     <div className="flex items-center text-slate-500">
