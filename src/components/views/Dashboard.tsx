@@ -125,6 +125,7 @@ export interface SpatialWorkerDetail {
   company?: string;
   wearables?: string[];
   area?: string;
+  workerRef?: YardWorkerPoint;
 }
 
 // 紧急安全告警实体接口 (用于触发告警时的明显提示窗)
@@ -1369,31 +1370,46 @@ const PROJECT_ELECTRONIC_FENCES: Record<string, SpatialElectronicFence[]> = {
   ]
 };
 
-// 厂区全景图空间人员定位点位 (对应附图绿色圆形小人徽标与分片统计)
-const YARD_SPATIAL_WORKERS = [
+// 厂区全景图空间人员定位点位 (对应绿色圆形小人徽标，支持同一工位重叠人员独立列表)
+export interface YardWorkerPoint {
+  id: string;
+  name: string;
+  role: string;
+  area: string;
+  top: string;
+  left: string;
+  status: '在岗' | '告警' | '离线';
+  avatarBg?: string;
+  personId?: string; // 关联 mockPersonnel EMP-xxx
+}
+
+const YARD_SPATIAL_WORKERS: YardWorkerPoint[] = [
   // 1. 龙门吊作业区人员点位
-  { id: 'W-01', name: '李强', role: '起重指挥', area: '龙门吊作业区', top: '19%', left: '12.5%', count: 1, status: '在岗' },
-  { id: 'W-02', name: '王伟', role: '龙门吊司机', area: '龙门吊作业区', top: '16.5%', left: '23%', count: 1, status: '在岗' },
-  { id: 'W-03', name: '张三', role: '合拢焊工', area: '龙门吊作业区', top: '16.5%', left: '33%', count: 1, status: '在岗' },
-  { id: 'W-04', name: '赵六', role: '装配钳工', area: '龙门吊作业区', top: '38.5%', left: '31%', count: 2, status: '在岗' },
-  { id: 'W-05', name: '孙敏', role: '探伤工程师', area: '龙门吊作业区', top: '30.5%', left: '23%', count: 1, status: '在岗' },
+  { id: 'W-01', name: '李强', role: '起重指挥', area: '龙门吊作业区', top: '19%', left: '12.5%', status: '在岗', avatarBg: 'bg-emerald-500', personId: 'EMP-003' },
+  { id: 'W-02', name: '王伟', role: '龙门吊司机', area: '龙门吊作业区', top: '16.5%', left: '23%', status: '在岗', avatarBg: 'bg-blue-600', personId: 'EMP-001' },
+  { id: 'W-03', name: '张三', role: '合拢焊工', area: '龙门吊作业区', top: '16.5%', left: '33%', status: '在岗', avatarBg: 'bg-cyan-600', personId: 'EMP-001' },
+  // 龙门吊同一位置重叠聚焦人员
+  { id: 'W-04A', name: '赵六', role: '装配钳工', area: '龙门吊作业区', top: '38.5%', left: '31%', status: '在岗', avatarBg: 'bg-amber-500', personId: 'EMP-006' },
+  { id: 'W-04B', name: '刘洋', role: '电焊工', area: '龙门吊作业区', top: '38.5%', left: '31%', status: '在岗', avatarBg: 'bg-indigo-600', personId: 'EMP-001' },
+  { id: 'W-05', name: '孙敏', role: '探伤工程师', area: '龙门吊作业区', top: '30.5%', left: '23%', status: '在岗', avatarBg: 'bg-teal-600', personId: 'EMP-002' },
 
   // 2. 钢材与预处理厂区人员点位
-  { id: 'W-06', name: '陈建国', role: '数控切割工', area: '钢材预处理厂区', top: '58%', left: '22%', count: 1, status: '在岗' },
-  { id: 'W-07', name: '刘洋', role: '行车吊运工', area: '钢材预处理厂区', top: '58%', left: '38%', count: 1, status: '在岗' },
-  { id: 'W-08', name: '吴凯', role: '流水线操作工', area: '钢材预处理厂区', top: '63%', left: '48%', count: 1, status: '在岗' },
-  { id: 'W-09', name: '郑浩', role: '钢板质检员', area: '钢材预处理厂区', top: '78%', left: '28%', count: 1, status: '在岗' },
-  { id: 'W-10', name: '黄海', role: '预处理喷砂工', area: '钢材预处理厂区', top: '82%', left: '45%', count: 1, status: '在岗' },
-  { id: 'W-11', name: '周华', role: '物料转运工', area: '钢材预处理厂区', top: '74%', left: '60%', count: 1, status: '在岗' },
+  { id: 'W-06', name: '陈建国', role: '数控切割工', area: '钢材预处理厂区', top: '58%', left: '22%', status: '在岗', avatarBg: 'bg-blue-500', personId: 'EMP-006' },
+  // 钢材预处理同一点位重叠人员
+  { id: 'W-07A', name: '周志强', role: '行车吊运工', area: '钢材预处理厂区', top: '58%', left: '38%', status: '在岗', avatarBg: 'bg-purple-600', personId: 'EMP-003' },
+  { id: 'W-07B', name: '郑浩', role: '钢板质检员', area: '钢材预处理厂区', top: '58%', left: '38%', status: '在岗', avatarBg: 'bg-sky-600', personId: 'EMP-002' },
+  { id: 'W-08', name: '吴凯', role: '流水线操作工', area: '钢材预处理厂区', top: '63%', left: '48%', status: '在岗', avatarBg: 'bg-emerald-600', personId: 'EMP-006' },
+  { id: 'W-10', name: '黄海', role: '预处理喷砂工', area: '钢材预处理厂区', top: '82%', left: '45%', status: '在岗', avatarBg: 'bg-amber-600', personId: 'EMP-004' },
+  { id: 'W-11', name: '周华', role: '物料转运工', area: '钢材预处理厂区', top: '74%', left: '60%', status: '在岗', avatarBg: 'bg-slate-600', personId: 'EMP-003' },
 
   // 3. S105轮及3号码头人员点位
-  { id: 'W-12', name: '钱亮', role: '舾装管系工', area: 'S105轮舾装泊位', top: '27%', left: '72%', count: 1, status: '在岗' },
-  { id: 'W-13', name: '徐峰', role: '电气调试工', area: 'S105轮舾装泊位', top: '38%', left: '75%', count: 1, status: '在岗' },
-  { id: 'W-14', name: '马涛', role: '船检工程师', area: 'S105轮舾装泊位', top: '45%', left: '79%', count: 1, status: '在岗' },
+  { id: 'W-12', name: '钱亮', role: '舾装管系工', area: 'S105轮舾装泊位', top: '27%', left: '72%', status: '在岗', avatarBg: 'bg-cyan-500', personId: 'EMP-005' },
+  { id: 'W-13', name: '徐峰', role: '电气调试工', area: 'S105轮舾装泊位', top: '38%', left: '75%', status: '在岗', avatarBg: 'bg-blue-600', personId: 'EMP-005' },
+  { id: 'W-14', name: '马涛', role: '船检工程师', area: 'S105轮舾装泊位', top: '45%', left: '79%', status: '在岗', avatarBg: 'bg-indigo-500', personId: 'EMP-002' },
 
   // 4. 1#船台分段区人员点位
-  { id: 'W-15', name: '杨光', role: '船台装配工', area: '1#船台分段区', top: '12%', left: '8%', count: 1, status: '在岗' },
-  { id: 'W-16', name: '方舟', role: '结构焊工', area: '1#船台分段区', top: '22%', left: '16%', count: 1, status: '在岗' },
+  { id: 'W-15', name: '杨光', role: '船台装配工', area: '1#船台分段区', top: '12%', left: '8%', status: '在岗', avatarBg: 'bg-emerald-500', personId: 'EMP-006' },
+  { id: 'W-16', name: '方舟', role: '结构焊工', area: '1#船台分段区', top: '22%', left: '16%', status: '在岗', avatarBg: 'bg-orange-600', personId: 'EMP-001' },
 ];
 
 // 厂区全景图空间设备标定数据 (精准对应各建筑实物位置)
@@ -1984,7 +2000,7 @@ const PROJECT_SPATIAL_DEVICES: Record<string, SpatialDevice[]> = {
 
 interface DashboardProps {
   onExit?: () => void;
-  onNavigate?: (view: ViewType) => void;
+  onNavigate?: (view: ViewType, extra?: { personId?: string; autoPlay?: boolean }) => void;
 }
 
 export function Dashboard({ onExit, onNavigate }: DashboardProps) {
@@ -2001,15 +2017,21 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
   // 面板显隐控制状态 (默认展示，点击背景滑动隐藏)
   const [isPanelsVisible, setIsPanelsVisible] = useState(true);
 
-  // 图层显隐与细分控制状态 (人员分布默认开启，设备分布默认关闭)
+  // 图层显隐与细分控制状态 (人员分布默认开启，设备分布默认关闭，船只分布默认关闭)
   const [showPersonnelLayer, setShowPersonnelLayer] = useState<boolean>(true);
   const [showDeviceLayer, setShowDeviceLayer] = useState<boolean>(false);
   const [showFenceLayer, setShowFenceLayer] = useState<boolean>(true);
-  const [showShipDistributionLayer, setShowShipDistributionLayer] = useState<boolean>(true);
+  const [showShipDistributionLayer, setShowShipDistributionLayer] = useState<boolean>(false);
   const [selectedDeviceCategory, setSelectedDeviceCategory] = useState<DeviceCategoryType>('all');
   const [selectedDeviceDetail, setSelectedDeviceDetail] = useState<SpatialDevice | null>(null);
   const [selectedFenceDetail, setSelectedFenceDetail] = useState<SpatialElectronicFence | null>(null);
   const [selectedWorkerDetail, setSelectedWorkerDetail] = useState<SpatialWorkerDetail | null>(null);
+  const [selectedWorkerCluster, setSelectedWorkerCluster] = useState<{
+    area: string;
+    top: string;
+    left: string;
+    workers: YardWorkerPoint[];
+  } | null>(null);
   const [activeAlarmModalData, setActiveAlarmModalData] = useState<ActiveAlarmData | null>(null);
   const [alarmNoticeToast, setAlarmNoticeToast] = useState<string | null>(null);
 
@@ -2323,54 +2345,107 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
         {showPersonnelLayer && (
           <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-100">
             {viewScope === 'yard' ? (
-              YARD_SPATIAL_WORKERS.map((worker) => {
-                const targetId = `W-2026-${worker.id}`;
-                return (
-                  <div 
-                    key={worker.id}
-                    className="absolute pointer-events-auto z-20 group cursor-pointer -translate-x-1/2 -translate-y-1/2 p-2"
-                    style={{ top: worker.top, left: worker.left }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedWorkerDetail(prev => prev?.id === targetId ? null : {
-                        id: targetId,
-                        name: worker.name,
-                        role: worker.role,
-                        status: worker.status === '在岗' ? 'online' : 'alarm',
-                        location: worker.area,
-                        projectName: '厂区全景作业区',
-                        time: formatDate(currentTime),
-                        battery: '95%',
-                        signalPower: '-64 dBm (优秀)',
-                        phone: '138-1234-5678',
-                        company: '江南造船总装一厂',
-                        wearables: ['防爆UWB定位手环 #HB-092', '智能安全帽传感器'],
-                        top: worker.top,
-                        left: worker.left
-                      });
-                    }}
-                  >
+              // 厂区人员点位：根据坐标分组，若同一位置有重叠人员，头像层叠显示（不合并成数字点）
+              (() => {
+                const groupedMap = new Map<string, YardWorkerPoint[]>();
+                YARD_SPATIAL_WORKERS.forEach(w => {
+                  const key = `${w.top}_${w.left}`;
+                  if (!groupedMap.has(key)) {
+                    groupedMap.set(key, []);
+                  }
+                  groupedMap.get(key)!.push(w);
+                });
+
+                return Array.from(groupedMap.entries()).map(([key, workers]) => {
+                  const firstWorker = workers[0];
+                  const isClustered = workers.length > 1;
+
+                  return (
                     <div 
-                      className="w-6 h-6 rounded-full bg-[#00e676] border-2 border-white shadow-[0_0_12px_#00e676] flex items-center justify-center hover:scale-130 transition-transform cursor-pointer"
-                      title={`点击查看人员定位信息: ${worker.name} (${worker.role}) - ${worker.area}`}
+                      key={key}
+                      className="absolute pointer-events-auto z-20 group cursor-pointer -translate-x-1/2 -translate-y-1/2 p-2"
+                      style={{ top: firstWorker.top, left: firstWorker.left }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isClustered) {
+                          // 点击重叠聚合点：弹出重叠人员列表
+                          setSelectedWorkerDetail(null);
+                          setSelectedWorkerCluster(prev => (prev?.top === firstWorker.top && prev?.left === firstWorker.left) ? null : {
+                            area: firstWorker.area,
+                            top: firstWorker.top,
+                            left: firstWorker.left,
+                            workers: workers
+                          });
+                        } else {
+                          // 单个工人：直接显示详细信息气泡
+                          setSelectedWorkerCluster(null);
+                          const targetId = `W-2026-${firstWorker.id}`;
+                          setSelectedWorkerDetail(prev => prev?.id === targetId ? null : {
+                            id: targetId,
+                            name: firstWorker.name,
+                            role: firstWorker.role,
+                            status: firstWorker.status === '在岗' ? 'online' : 'alarm',
+                            location: firstWorker.area,
+                            projectName: '厂区全景作业区',
+                            time: formatDate(currentTime),
+                            battery: '95%',
+                            signalPower: '-64 dBm (优秀)',
+                            phone: '138-1234-5678',
+                            company: '江南造船总装一厂',
+                            wearables: ['防爆UWB定位手环 #HB-092', '智能安全帽传感器'],
+                            top: firstWorker.top,
+                            left: firstWorker.left,
+                            workerRef: firstWorker
+                          });
+                        }
+                      }}
                     >
-                      {worker.count > 1 ? (
-                        <span className="text-[9px] font-bold text-[#061833]">{worker.count}</span>
+                      {/* 头像显示：重叠显示多个头像（不合并成单一数字点） */}
+                      {isClustered ? (
+                        <div 
+                          className="flex items-center -space-x-2.5 hover:scale-120 transition-transform cursor-pointer"
+                          title={`此工位聚焦 ${workers.length} 位作业人员，点击查看人员列表`}
+                        >
+                          {workers.slice(0, 3).map((w, idx) => (
+                            <div 
+                              key={w.id}
+                              style={{ zIndex: 10 - idx }}
+                              className={`w-6 h-6 rounded-full border-2 border-white text-[10px] font-bold text-white flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.5)] ${
+                                w.avatarBg || (idx % 2 === 0 ? 'bg-emerald-500' : 'bg-blue-600')
+                              }`}
+                            >
+                              {w.name.slice(0, 1)}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
-                        <User className="w-3.5 h-3.5 text-[#061833]" />
+                        <div 
+                          className="w-6 h-6 rounded-full bg-[#00e676] border-2 border-white shadow-[0_0_12px_#00e676] flex items-center justify-center hover:scale-130 transition-transform cursor-pointer text-[#061833] font-bold text-[10px]"
+                          title={`点击查看人员定位信息: ${firstWorker.name} (${firstWorker.role}) - ${firstWorker.area}`}
+                        >
+                          <User className="w-3.5 h-3.5 text-[#061833]" />
+                        </div>
                       )}
-                    </div>
-                    
-                    {/* 人员悬浮快速标签 */}
-                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-30">
-                      <div className="bg-[#061833]/95 border border-[#00e676] text-[10px] text-white px-2 py-0.5 rounded shadow-lg whitespace-nowrap flex items-center gap-1">
-                        <span className="text-[#00e676] font-bold">{worker.name}</span>
-                        <span className="text-[#8ab4f8]">({worker.role})</span>
+                      
+                      {/* 人员悬浮快速标签 */}
+                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-30">
+                        <div className="bg-[#061833]/95 border border-[#00e676] text-[10px] text-white px-2 py-0.5 rounded shadow-lg whitespace-nowrap flex items-center gap-1">
+                          {isClustered ? (
+                            <span className="text-[#00e676] font-bold">
+                              {workers.map(w => w.name).join(', ')} ({workers.length}人同位作业)
+                            </span>
+                          ) : (
+                            <>
+                              <span className="text-[#00e676] font-bold">{firstWorker.name}</span>
+                              <span className="text-[#8ab4f8]">({firstWorker.role})</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                });
+              })()
             ) : (
               currentProject.markers.map((marker) => (
                 <div 
@@ -2796,14 +2871,112 @@ export function Dashboard({ onExit, onNavigate }: DashboardProps) {
               <div className="mt-2.5 pt-2 border-t border-[#1f4a7c]">
                 <button
                   onClick={() => {
-                    setAlarmNoticeToast(`已调取【${selectedWorkerDetail.name}】今日作业行动轨迹`);
-                    setTimeout(() => setAlarmNoticeToast(null), 3000);
+                    const personId = selectedWorkerDetail.workerRef?.personId || 'EMP-001';
+                    if (onNavigate) {
+                      onNavigate('personnel', { personId, autoPlay: true });
+                    } else {
+                      setAlarmNoticeToast(`已调取【${selectedWorkerDetail.name}】今日作业行动轨迹`);
+                      setTimeout(() => setAlarmNoticeToast(null), 3000);
+                    }
                   }}
                   className="w-full py-1.5 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400 text-xs font-bold text-[#00e5ff] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_12px_rgba(0,229,255,0.2)]"
                 >
                   <Crosshair className="w-3.5 h-3.5 text-[#00e5ff]" />
                   <span>查看轨迹回放</span>
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 👥 7. 点击重叠人员聚焦位弹出的重叠人员列表浮窗 */}
+        {selectedWorkerCluster && (
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="absolute z-50 animate-fadeIn pointer-events-auto transition-all duration-200 select-none"
+            style={{
+              top: selectedWorkerCluster.top || '40%',
+              left: selectedWorkerCluster.left || '50%',
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-18px'
+            }}
+          >
+            <div className="w-88 bg-[#061833]/95 border-2 border-cyan-400 rounded-2xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.85),0_0_24px_rgba(0,210,255,0.35)] backdrop-blur-xl relative text-[#e2f1ff]">
+              {/* 向下指向的冒泡小三角 */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#061833] border-r border-b border-cyan-400 rotate-45"></div>
+
+              {/* 标题栏 */}
+              <div className="flex items-center justify-between border-b border-[#1f4a7c] pb-2.5 mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
+                      <span>同位聚焦人员列表</span>
+                      <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700/60 px-1.5 py-0.2 rounded-full font-mono font-bold">
+                        {selectedWorkerCluster.workers.length} 人
+                      </span>
+                    </h3>
+                    <p className="text-[10px] text-cyan-300/80 mt-0.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-cyan-400" />
+                      <span>{selectedWorkerCluster.area}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setSelectedWorkerCluster(null)}
+                  className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* 重叠人员列表卡片 */}
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                {selectedWorkerCluster.workers.map((worker) => (
+                  <div 
+                    key={worker.id}
+                    className="p-2.5 rounded-xl bg-[#0a2347]/70 border border-cyan-500/30 hover:border-cyan-400 hover:bg-[#0e2f5e]/90 transition-all flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* 头像 */}
+                      <div className={`w-8 h-8 rounded-full ${worker.avatarBg || 'bg-blue-600'} text-white font-bold text-xs flex items-center justify-center shrink-0 border border-white/40 shadow-sm`}>
+                        {worker.name.slice(0, 1)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-white truncate">{worker.name}</span>
+                          <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-800/40">
+                            {worker.role}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                          状态: <span className="text-emerald-400 font-semibold">{worker.status}</span> · 工号: {worker.id}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 点击查看轨迹跳转按钮 */}
+                    <button
+                      onClick={() => {
+                        const personId = worker.personId || 'EMP-001';
+                        if (onNavigate) {
+                          onNavigate('personnel', { personId, autoPlay: true });
+                        } else {
+                          setAlarmNoticeToast(`跳转查看【${worker.name}】定位轨迹`);
+                          setTimeout(() => setAlarmNoticeToast(null), 3000);
+                        }
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-400 text-[11px] font-bold text-cyan-300 transition-all cursor-pointer flex items-center gap-1 shrink-0 whitespace-nowrap hover:shadow-[0_0_10px_rgba(0,210,255,0.4)]"
+                      title="点击跳转到人员定位页面并自动播放历史轨迹"
+                    >
+                      <Crosshair className="w-3 h-3 text-cyan-300" />
+                      <span>查看轨迹</span>
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

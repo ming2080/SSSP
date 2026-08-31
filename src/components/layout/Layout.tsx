@@ -12,13 +12,26 @@ import { ShipModelManagement } from '../views/ShipModelManagement';
 
 export function Layout() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  const [personnelNavState, setPersonnelNavState] = useState<{ personId?: string; autoPlay?: boolean } | null>(null);
+
+  const handleNavigate = (view: ViewType, extra?: { personId?: string; autoPlay?: boolean }) => {
+    if (view === 'personnel' && extra) {
+      setPersonnelNavState(extra);
+    }
+    setCurrentView(view);
+  };
 
   const renderView = () => {
     switch (currentView) {
-      case 'dashboard': return <Dashboard onExit={() => setCurrentView('projects')} onNavigate={setCurrentView} />;
+      case 'dashboard': return <Dashboard onExit={() => setCurrentView('projects')} onNavigate={handleNavigate} />;
       case 'projects': return <ProjectManagement />;
       case 'models': return <ShipModelManagement />;
-      case 'personnel': return <PersonnelTracking />;
+      case 'personnel': return (
+        <PersonnelTracking 
+          initialPersonId={personnelNavState?.personId} 
+          initialAutoPlay={personnelNavState?.autoPlay} 
+        />
+      );
       case 'fence': return <ElectronicFence />;
       case 'alarms': return <AlarmConfig />;
       case 'devices': return <DeviceManagement />;

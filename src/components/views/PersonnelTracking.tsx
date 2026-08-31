@@ -63,9 +63,14 @@ import containerShipImg from '@/src/assets/images/container_ship_model_178797258
 import tankerShipImg from '@/src/assets/images/tanker_ship_model_1787972594875.jpg';
 import bulkShipImg from '@/src/assets/images/bulk_ship_model_1787972609425.jpg';
 
-export function PersonnelTracking() {
+interface PersonnelTrackingProps {
+  initialPersonId?: string;
+  initialAutoPlay?: boolean;
+}
+
+export function PersonnelTracking({ initialPersonId, initialAutoPlay = false }: PersonnelTrackingProps = {}) {
   // 选中的人员
-  const [selectedPersonId, setSelectedPersonId] = useState<string>('EMP-001');
+  const [selectedPersonId, setSelectedPersonId] = useState<string>(initialPersonId || 'EMP-001');
   // 人员工种下拉筛选
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('all');
   // 人员班组下拉筛选
@@ -109,7 +114,7 @@ export function PersonnelTracking() {
   });
 
   // 轨迹回放控制
-  const [isPlayingTrajectory, setIsPlayingTrajectory] = useState<boolean>(false);
+  const [isPlayingTrajectory, setIsPlayingTrajectory] = useState<boolean>(initialAutoPlay);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   
